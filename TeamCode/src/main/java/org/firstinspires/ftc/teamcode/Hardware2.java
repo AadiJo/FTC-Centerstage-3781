@@ -32,6 +32,7 @@ public class Hardware2 {
     public DistanceSensor distSensor;
     public TouchSensor magnetSens;
     public ColorSensor colorSensor;
+    public int hello;
 
     public boolean runThisWithEncoder = true;
 

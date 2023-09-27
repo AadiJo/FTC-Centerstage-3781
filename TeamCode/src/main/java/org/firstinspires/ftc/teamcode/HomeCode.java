@@ -2,28 +2,26 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;//YESS
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.Servo.Direction;
 import com.qualcomm.robotcore.util.ElapsedTime;
+@TeleOp(name = "HomeCode", group = "Pirhos")
 
-@TeleOp(name = "FirstController", group = "Pirhos")
-
-public class FirstCode extends LinearOpMode  {
+public class HomeCode extends LinearOpMode {
 
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
-private Servo claw;
-    private CRServo arm;
+
+    private Servo arm;
     public void strafe(double speed){
         frontLeft.setPower(-speed);
         frontRight.setPower(speed);
         backLeft.setPower(-speed);
         backRight.setPower(-speed);
+
     }
 //    public void strafeRight(double speed){
 //        frontLeft.setPower(speed);
@@ -55,8 +53,8 @@ private Servo claw;
         frontRight = hardwareMap.get(DcMotor.class, "frntRT");
         backLeft = hardwareMap.get(DcMotor.class, "bckLF");
         backRight = hardwareMap.get(DcMotor.class, "bckRT");
-        arm = hardwareMap.crservo.get("arm");
-        claw = hardwareMap.servo.get("claw");
+        arm = hardwareMap.servo.get("arm");
+
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
         Hardware2 robot = new Hardware2(false);
         ElapsedTime time = new ElapsedTime();
@@ -70,23 +68,17 @@ private Servo claw;
 
             strafe(gamepad1.right_stick_x);
 
-while (gamepad1.a)
-{
+            while (gamepad1.a)
+            {
 
-    arm.setPower(-1);
-}
-while(gamepad1.b){
-    arm.setPower(1);
-}
-
-if (gamepad1.y){
-    claw.setPosition(1);
-
-}
-        }
-        if(gamepad1.x){
-            claw.setPosition(0);
+                arm.setDirection(Servo.Direction.REVERSE);
+            }
+            while(gamepad1.b){
+                arm.setDirection(Servo.Direction.FORWARD);
+            }
         }
 
 
     }}
+
+
