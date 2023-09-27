@@ -17,14 +17,20 @@ public class FirstCode extends LinearOpMode  {
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
-private Servo claw;
+    private Servo claw;
     private CRServo arm;
     public void strafe(double speed){
         frontLeft.setPower(-speed);
-        frontRight.setPower(speed);
-        backLeft.setPower(-speed);
+        frontRight.setPower(-speed);
+        backLeft.setPower(speed);
         backRight.setPower(-speed);
     }
+//    public void strafeRight(double speed){
+//        frontLeft.setPower(speed);
+//        frontRight.setPower(speed);
+//        backLeft.setPower(-speed);
+//        backRight.setPower(speed);
+//    }
 //    public void strafeRight(double speed){
 //        frontLeft.setPower(speed);
 //        frontRight.setPower(-speed);
@@ -63,12 +69,16 @@ private Servo claw;
         waitForStart();
         while (opModeIsActive()) {
 
-            backLeft.setPower(-gamepad1.left_stick_y);
-            backRight.setPower(gamepad1.left_stick_y);
-            frontLeft.setPower(gamepad1.left_stick_y);
-            frontRight.setPower(gamepad1.left_stick_y);
-
-            strafe(gamepad1.right_stick_x);
+            backLeft.setPower(gamepad1.left_stick_y);
+            backRight.setPower(-gamepad1.left_stick_y);
+            frontLeft.setPower(-gamepad1.left_stick_y);
+            frontRight.setPower(-gamepad1.left_stick_y);
+        while(gamepad1.dpad_right){
+            strafe(.5);
+        }
+        while(gamepad1.dpad_left){
+            strafe(-.5);
+        }
 
 while (gamepad1.a)
 {
@@ -78,15 +88,18 @@ while (gamepad1.a)
 while(gamepad1.b){
     arm.setPower(1);
 }
+arm.setPower(0);
 
-if (gamepad1.y){
+if (gamepad1.left_bumper){
     claw.setPosition(1);
 
+
 }
+if (gamepad1.right_bumper){
+                claw.setPosition(0);
+            }
         }
-        if(gamepad1.x){
-            claw.setPosition(0);
-        }
+
 
 
     }}
