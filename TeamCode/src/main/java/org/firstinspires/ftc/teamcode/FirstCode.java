@@ -1,18 +1,23 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;//YESS
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.Servo.Direction;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "FirstController", group = "Pirhos")
+import org.firstinspires.ftc.robotcontroller.internal.PermissionValidatorWrapper;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+
+@TeleOp(name = "Bug Squasher", group = "Pirhos")
 
 public class FirstCode extends LinearOpMode  {
-
+private BHI260IMU imu;
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor backLeft;
@@ -20,11 +25,12 @@ public class FirstCode extends LinearOpMode  {
     private Servo claw;
     private CRServo arm;
     public void strafe(double speed){
-        frontLeft.setPower(-speed);
-        frontRight.setPower(-speed);
+        frontLeft.setPower(speed);
+        frontRight.setPower(speed);
         backLeft.setPower(speed);
         backRight.setPower(-speed);
     }
+
 //    public void strafeRight(double speed){
 //        frontLeft.setPower(speed);
 //        frontRight.setPower(speed);
@@ -52,7 +58,7 @@ public class FirstCode extends LinearOpMode  {
         backLeft.setPower(speed);
     }
     public void setRight(double speed){
-        frontRight.setPower(speed);
+        frontRight.setPower(-speed);
         backRight.setPower(speed);
 
     }
@@ -63,24 +69,32 @@ public class FirstCode extends LinearOpMode  {
         backRight = hardwareMap.get(DcMotor.class, "bckRT");
         arm = hardwareMap.crservo.get("arm");
         claw = hardwareMap.servo.get("claw");
+
+
+        imu = hardwareMap.get(BHI260IMU.class,"imu");
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
-        Hardware2 robot = new Hardware2(false);
+        PermissionValidatorWrapper.Hardware2 robot = new PermissionValidatorWrapper.Hardware2(false);
         ElapsedTime time = new ElapsedTime();
         waitForStart();
         while (opModeIsActive()) {
-
+//            telemetry.addData("Current IMU", imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle );
             backLeft.setPower(gamepad1.left_stick_y);
             backRight.setPower(-gamepad1.left_stick_y);
             frontLeft.setPower(-gamepad1.left_stick_y);
             frontRight.setPower(-gamepad1.left_stick_y);
-        while(gamepad1.dpad_right){
+
+
+            //strafing commands
+            while(gamepad1.dpad_right){
             strafe(.5);
         }
         while(gamepad1.dpad_left){
             strafe(-.5);
         }
 
-while (gamepad1.a)
+
+        // controls the arm
+        while (gamepad1.a)
 {
 
     arm.setPower(-1);
@@ -90,15 +104,36 @@ while(gamepad1.b){
 }
 arm.setPower(0);
 
+//sets claw positions
 if (gamepad1.left_bumper){
     claw.setPosition(1);
 
 
 }
+
 if (gamepad1.right_bumper){
                 claw.setPosition(0);
             }
+
+
+
+
+            //turns the robot left and right
+if((gamepad1.right_stick_x)>0){
+    backLeft.setPower(gamepad1.left_stick_y);
+    backRight.setPower(gamepad1.left_stick_y);
+    frontLeft.setPower(-gamepad1.left_stick_y);
+    frontRight.setPower(gamepad1.left_stick_y);
+}
+            if((gamepad1.right_stick_x)<0){
+                backLeft.setPower(-gamepad1.left_stick_y);
+                backRight.setPower(-gamepad1.left_stick_y);
+                frontLeft.setPower(gamepad1.left_stick_y);
+                frontRight.setPower(-gamepad1.left_stick_y);
+            }
+
         }
+
 
 
 

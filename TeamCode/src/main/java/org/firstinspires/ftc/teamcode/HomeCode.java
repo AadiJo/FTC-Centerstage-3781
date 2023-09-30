@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcontroller.internal.PermissionValidatorWrapper;
+
 @TeleOp(name = "HomeCode", group = "Pirhos")
 
 public class HomeCode extends LinearOpMode {
@@ -56,7 +58,7 @@ public class HomeCode extends LinearOpMode {
         arm = hardwareMap.servo.get("arm");
 
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
-        Hardware2 robot = new Hardware2(false);
+        PermissionValidatorWrapper.Hardware2 robot = new PermissionValidatorWrapper.Hardware2(false);
         ElapsedTime time = new ElapsedTime();
         waitForStart();
         while (opModeIsActive()) {
