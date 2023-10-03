@@ -52,12 +52,7 @@ public class FieldCentric extends LinearOpMode {
         backRight.setPower(speed);
     }
 
-    public void moveBot(double xSpeed, double ySpeed){
-        frontLeft.setPower(ySpeed + xSpeed + xSpeed);
-        frontRight.setPower(ySpeed - xSpeed - xSpeed);
-        backLeft.setPower(ySpeed - xSpeed + xSpeed);
-        backRight.setPower(ySpeed + xSpeed - xSpeed);
-    }
+
 
     // BOT ANGLE GOES COUNTERCLOCKWISE 0 90 180 -90 0
 
@@ -119,6 +114,12 @@ public class FieldCentric extends LinearOpMode {
 
     }
 
+    public void moveBot(double xSpeed, double ySpeed){
+        frontLeft.setPower(ySpeed + xSpeed);
+        frontRight.setPower(ySpeed - xSpeed);
+        backLeft.setPower(ySpeed - xSpeed);
+        backRight.setPower(ySpeed + xSpeed);
+    }
     private double joystickVectorMagnitude(double x, double y){
         return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
     }
@@ -155,15 +156,14 @@ public class FieldCentric extends LinearOpMode {
         imu.resetYaw();
 
         //initialize motors
-        frontLeft = hardwareMap.get(DcMotor.class, "frntLF");
-        frontRight = hardwareMap.get(DcMotor.class, "frntRT");
-        backLeft = hardwareMap.get(DcMotor.class, "bckLF");
-        backRight = hardwareMap.get(DcMotor.class, "bckRT");
+        frontLeft = hardwareMap.get(DcMotor.class, "bckLF");
+        frontRight = hardwareMap.get(DcMotor.class, "bckRT");
+        backLeft = hardwareMap.get(DcMotor.class, "frntLF");
+        backRight = hardwareMap.get(DcMotor.class, "frntRT");
 
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
         // NEGATIVE TO GO FORWARD
          backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         // backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         //frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
