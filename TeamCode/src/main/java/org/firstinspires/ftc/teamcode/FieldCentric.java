@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-@TeleOp(name = "FeildCentric", group = "Pirhos")
+@TeleOp(name = "FieldCentric", group = "Pirhos")
 public class FieldCentric extends LinearOpMode {
     double error;
     BHI260IMU imu;
