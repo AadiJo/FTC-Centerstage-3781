@@ -64,7 +64,6 @@ public class FirstCode extends LinearOpMode  {
         arm = hardwareMap.crservo.get("arm");
         claw = hardwareMap.servo.get("claw");
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
-        Hardware2 robot = new Hardware2(false);
         ElapsedTime time = new ElapsedTime();
         waitForStart();
         while (opModeIsActive()) {
