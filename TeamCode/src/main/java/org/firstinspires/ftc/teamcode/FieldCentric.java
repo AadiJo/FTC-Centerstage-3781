@@ -3,21 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;//YESS
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.ConceptExploringIMUOrientation;
-import org.firstinspires.ftc.robotcontroller.internal.PermissionValidatorWrapper;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp(name = "FeildCentric", group = "Pirhos")
@@ -50,6 +42,27 @@ public class FieldCentric extends LinearOpMode {
         frontRight.setPower(speed);
         backLeft.setPower(speed);
         backRight.setPower(speed);
+    }
+
+    private void turn(double angle){
+        // angle going from 0 90 180 - 90 0
+        if (angle < 180 && angle > 0){
+            while (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < angle){
+                frontLeft.setPower(-0.5);
+                frontRight.setPower(0.5);
+                backLeft.setPower(-0.5);
+                backRight.setPower(0.5);
+            }
+        }else if (angle > -180 && angle < 0){
+            while (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > angle){
+                frontLeft.setPower(0.5);
+                frontRight.setPower(-0.5);
+                backLeft.setPower(0.5);
+                backRight.setPower(-0.5);
+            }
+
+        }
+
     }
 
 
@@ -163,7 +176,7 @@ public class FieldCentric extends LinearOpMode {
 
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
         // NEGATIVE TO GO FORWARD
-         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         // backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         //frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -174,6 +187,9 @@ public class FieldCentric extends LinearOpMode {
             //read joy stick input
             double joyStickX = gamepad1.left_stick_x;
             double joyStickY = -gamepad1.left_stick_y;
+
+            double rightJoyStickX = gamepad1.right_stick_x;
+            double rightJoyStickY = -gamepad1.right_stick_y;
 
             // Smoothing user input
 
@@ -192,11 +208,15 @@ public class FieldCentric extends LinearOpMode {
 
             // Read joystick angle input
             double JoystickAngle = radiansToDegrees(Math.atan2(joyStickY,joyStickX));
+            double RightJoystickAngle = radiansToDegrees(Math.atan2(rightJoyStickY,rightJoyStickX));
 
             //converting it to match bot imu convention
             JoystickAngle = convertJoystickAngle(JoystickAngle);
+            RightJoystickAngle = convertJoystickAngle(RightJoystickAngle);
 
-            telemetry.addData("JS angle", JoystickAngle);
+
+            telemetry.addData("Left JS angle", JoystickAngle);
+            telemetry.addData("Right JS angle", RightJoystickAngle);
 
             // FC magnitude for bot = joystick magnitude
             //double joystickVM = joystickVectorMagnitude(joyStickX,joyStickY);
@@ -225,6 +245,22 @@ public class FieldCentric extends LinearOpMode {
             moveBot(botXSpeed, botYSpeed);
 
             telemetry.update();
+            if(gamepad1.right_stick_x > 0){
+
+                backLeft.setPower(gamepad1.right_stick_x);
+                frontLeft.setPower(gamepad1.right_stick_x);
+                backRight.setPower(-gamepad1.right_stick_x);
+                frontRight.setPower(-gamepad1.right_stick_x);
+            }
+            if(gamepad1.right_stick_x < 0){
+
+                backRight.setPower(-gamepad1.right_stick_x);
+                frontRight.setPower(-gamepad1.right_stick_x);
+                frontLeft.setPower(gamepad1.right_stick_x);
+                backLeft.setPower(gamepad1.right_stick_x);
+
+            }
+
         }
 
     }
