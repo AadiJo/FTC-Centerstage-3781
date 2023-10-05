@@ -17,7 +17,9 @@ public class FirstCode extends LinearOpMode  {
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
-    private Servo claw;
+    private Servo clawL;
+    private Servo clawR;
+
     private CRServo arm;
     public void strafe(double speed){
         frontLeft.setPower(-speed);
@@ -62,16 +64,17 @@ public class FirstCode extends LinearOpMode  {
         backLeft = hardwareMap.get(DcMotor.class, "bckLF");
         backRight = hardwareMap.get(DcMotor.class, "bckRT");
         arm = hardwareMap.crservo.get("arm");
-        claw = hardwareMap.servo.get("claw");
+        clawR = hardwareMap.servo.get("clawR");
+        clawL = hardwareMap.servo.get("clawL");
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
         ElapsedTime time = new ElapsedTime();
         waitForStart();
         while (opModeIsActive()) {
 
             backLeft.setPower(gamepad1.left_stick_y);
-            backRight.setPower(-gamepad1.left_stick_y);
-            frontLeft.setPower(-gamepad1.left_stick_y);
-            frontRight.setPower(-gamepad1.left_stick_y);
+            backRight.setPower(gamepad1.left_stick_y);
+            frontLeft.setPower(gamepad1.left_stick_y);
+            frontRight.setPower(gamepad1.left_stick_y);
         while(gamepad1.dpad_right){
             strafe(.5);
         }
@@ -90,12 +93,14 @@ while(gamepad1.b){
 arm.setPower(0);
 
 if (gamepad1.left_bumper){
-    claw.setPosition(1);
+    clawR.setPosition(0);
+    clawL.setPosition(1);
 
 
 }
 if (gamepad1.right_bumper){
-                claw.setPosition(0);
+                clawR.setPosition(1);
+                clawL.setPosition(0);
             }
         }
 

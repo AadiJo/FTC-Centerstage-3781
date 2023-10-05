@@ -4,9 +4,11 @@ import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -16,7 +18,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 public class FieldCentric extends LinearOpMode {
     double error;
     BHI260IMU imu;
-
+private Servo clawR;
+private Servo clawL;
+private CRServo arm;
     private double botSpeedL1 = 0.30f;
     private double botSpeedL2 = 0.50f;
     private double botSpeedL3 = 0.80f;
@@ -169,10 +173,14 @@ public class FieldCentric extends LinearOpMode {
         imu.resetYaw();
 
         //initialize motors
+        clawL = hardwareMap.servo.get("clawL");
+        clawR = hardwareMap.servo.get("clawR");
         frontLeft = hardwareMap.get(DcMotor.class, "bckLF");
         frontRight = hardwareMap.get(DcMotor.class, "bckRT");
         backLeft = hardwareMap.get(DcMotor.class, "frntLF");
         backRight = hardwareMap.get(DcMotor.class, "frntRT");
+        arm = hardwareMap.crservo.get("arm");
+
 
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
         // NEGATIVE TO GO FORWARD
@@ -260,8 +268,28 @@ public class FieldCentric extends LinearOpMode {
                 backLeft.setPower(gamepad1.right_stick_x);
 
             }
+            if (gamepad1.left_bumper){
+                clawR.setPosition(0);
+                clawL.setPosition(1);
+
+
+            }
+            if (gamepad1.right_bumper){
+                clawR.setPosition(1);
+                clawL.setPosition(0);
+            }
+
+            while (gamepad1.a)
+            {
+
+                arm.setPower(-1);
+            }
+            while(gamepad1.b){
+                arm.setPower(1);
+            }
+            arm.setPower(-.05);
+        }
 
         }
 
     }
-}
