@@ -175,15 +175,18 @@ private CRServo arm;
         //initialize motors
         clawL = hardwareMap.servo.get("clawL");
         clawR = hardwareMap.servo.get("clawR");
-        frontLeft = hardwareMap.get(DcMotor.class, "bckLF");
-        frontRight = hardwareMap.get(DcMotor.class, "bckRT");
-        backLeft = hardwareMap.get(DcMotor.class, "frntLF");
-        backRight = hardwareMap.get(DcMotor.class, "frntRT");
+        backLeft = hardwareMap.get(DcMotor.class, "bckLF");
+        backRight = hardwareMap.get(DcMotor.class, "bckRT");
+        frontLeft = hardwareMap.get(DcMotor.class, "frntLF");
+        frontRight = hardwareMap.get(DcMotor.class, "frntRT");
         arm = hardwareMap.crservo.get("arm");
 
 
         //BACK LEFT SHOULD BE NEGATIVE to go fwd
         // NEGATIVE TO GO FORWARD
+        backRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         // backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         //frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -287,7 +290,7 @@ private CRServo arm;
             while(gamepad1.b){
                 arm.setPower(1);
             }
-            arm.setPower(-.05);
+            arm.setPower(0);
         }
 
         }
