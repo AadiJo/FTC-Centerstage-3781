@@ -25,12 +25,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 public class EncoderDrive extends LinearOpMode{
 public final double encoderTicks = 537.7;
 public double targetTicks;
-public final double cirucumferenceOfWheel = 3.78 * 2* Math.PI;
+public final double cirucumferenceOfWheel = 3.78;
     DcMotor frontRight;
     DcMotor frontLeft;
     DcMotor backLeft;
     DcMotor backRight;
+    DcMotor midDrive;
+    DcMotor leftDrive;
+    DcMotor rightDrive;
     BHI260IMU imu;
+    final double circumOfODO = 1.89;
     Orientation angles = new Orientation();
 int getPosition;
 
@@ -127,6 +131,14 @@ int getPosition;
         }
 
 
+
+    }
+    public void goWithOdo(double speed,double inches){
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        midDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+
     }
     public void turn(int angle, double speed, char direction){
         if (direction == 'r'){
@@ -155,6 +167,9 @@ while (angles.firstAngle != angle){
         backRight = hardwareMap.get(DcMotor.class, "bckRT");
         frontLeft = hardwareMap.get(DcMotor.class, "frntLF");
         frontRight = hardwareMap.get(DcMotor.class, "frntRT");
+        leftDrive = hardwareMap.get(DcMotor.class, "LFDRIVE");
+        rightDrive = hardwareMap.get(DcMotor.class, "RTDRIVE");
+         midDrive = hardwareMap.get(DcMotor.class, "MIDDRIVE");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
@@ -194,6 +209,9 @@ while (opModeIsActive()){
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        midDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
     }
 
@@ -204,6 +222,13 @@ while (opModeIsActive()){
     telemetry.addData("frontLeft", frontLeft.getCurrentPosition());
 
     telemetry.addData("frontRight", frontRight.getCurrentPosition());
+    telemetry.addData("Right Drive", rightDrive.getCurrentPosition());
+    telemetry.addData("Letf Drive", leftDrive.getCurrentPosition());
+    telemetry.addData("mid Drive", midDrive.getCurrentPosition());
+
+
+
+
     telemetry.update();
 
 }
