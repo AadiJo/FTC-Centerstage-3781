@@ -8,21 +8,17 @@ import org.opencv.core.Mat;
 
 @Autonomous(name = "AutoCamera", group = "Pirhos")
 public class CameraAuto extends LinearOpMode {
-    OpenCvCamera webcam;
-
-
-
-
-
+    OpenCvWebcam webcam;
     @Override
     public void runOpMode() throws InterruptedException {
+        WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam1");
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID","id",hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        webcam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        examplePipeline x = new examplePipeline();
-        webcam.setPipeline(x);
+        //webcam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+
+        webcam.setPipeline(new examplePipeline());
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
@@ -37,7 +33,7 @@ public class CameraAuto extends LinearOpMode {
 
         waitForStart();
 
-        telemetry.addData("left avg: ", x.returnLeftAvg());
+
 
 
     }

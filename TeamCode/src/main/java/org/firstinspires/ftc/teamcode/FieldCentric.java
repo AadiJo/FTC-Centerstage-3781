@@ -188,6 +188,10 @@ private CRServo arm;
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         //frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -291,6 +295,13 @@ private CRServo arm;
                 arm.setPower(1);
             }
             arm.setPower(0);
+            telemetry.addData("backLeft", backLeft.getCurrentPosition());
+            telemetry.addData("backRight", backRight.getCurrentPosition());
+
+            telemetry.addData("frontLeft", frontLeft.getCurrentPosition());
+
+            telemetry.addData("frontRight", frontRight.getCurrentPosition());
+            telemetry.update();
         }
 
         }

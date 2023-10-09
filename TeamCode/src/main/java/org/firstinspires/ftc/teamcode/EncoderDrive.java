@@ -25,7 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 public class EncoderDrive extends LinearOpMode{
 public final double encoderTicks = 537.7;
 public double targetTicks;
-public final double cirucumferenceOfWheel = 3.78 * 2;
+public final double cirucumferenceOfWheel = 3.78 * 2* Math.PI;
     DcMotor frontRight;
     DcMotor frontLeft;
     DcMotor backLeft;
@@ -184,6 +184,17 @@ while (opModeIsActive()){
     encoderDrive(12,.5);}
     if (gamepad1.b){
         strafeWithEncoder(45,12,.5);
+    }
+    if (gamepad1.y){
+        encoderDrive(12,.7);
+        encoderDrive(-12,.7);
+    }
+    if(gamepad1.x) {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
     }
 
 

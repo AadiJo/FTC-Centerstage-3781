@@ -91,8 +91,5 @@ telemetry.update();
         return output;
 
     }
-     public double returnLeftAvg(){
-        return leftavgfinal;
-     }
 
 }
