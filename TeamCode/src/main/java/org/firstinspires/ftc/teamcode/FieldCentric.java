@@ -182,7 +182,7 @@ private CRServo arm;
         arm = hardwareMap.crservo.get("arm");
 
 
-        //BACK LEFT SHOULD BE NEGATIVE to go fwd
+        //BACK LEFT SHOULD BE NEGATIVE to go fwd hi
         // NEGATIVE TO GO FORWARD
         backRight.setDirection(DcMotorSimple.Direction.FORWARD);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
