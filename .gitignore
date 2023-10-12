@@ -78,4 +78,11 @@ lint/intermediates/
 lint/generated/
 lint/outputs/
 lint/tmp/
+<<<<<<< HEAD
 # lint/reports/
+=======
+# lint/reports/
+
+.DS_Store
+/.idea
+>>>>>>> 9201a94 (Add new repo)

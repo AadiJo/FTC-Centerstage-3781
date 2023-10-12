@@ -33,6 +33,7 @@ import android.Manifest;
 import android.os.Bundle;
 
 import com.qualcomm.ftcrobotcontroller.R;
+<<<<<<< HEAD
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -40,6 +41,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+=======
+>>>>>>> 9201a94 (Add new repo)
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
 import org.firstinspires.ftc.robotcore.internal.system.PermissionValidatorActivity;
@@ -95,6 +98,7 @@ public class PermissionValidatorWrapper extends PermissionValidatorActivity {
         FtcRobotControllerActivity.setPermissionsValidated();
         return startApplication;
     }
+<<<<<<< HEAD
 
     /**
      * Created by Lance He 9/16/2017. Hello Guys
@@ -313,4 +317,6 @@ public class PermissionValidatorWrapper extends PermissionValidatorActivity {
         }
         */
     }
+=======
+>>>>>>> 9201a94 (Add new repo)
 }

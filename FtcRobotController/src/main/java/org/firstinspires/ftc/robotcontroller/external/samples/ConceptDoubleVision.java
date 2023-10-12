@@ -32,7 +32,10 @@ package org.firstinspires.ftc.robotcontroller.external.samples;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+<<<<<<< HEAD
 import java.util.List;
+=======
+>>>>>>> 9201a94 (Add new repo)
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -41,8 +44,15 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
+<<<<<<< HEAD
 /**
  * This 2023-2024 OpMode illustrates the basics of using both AprilTag recognition and TensorFlow
+=======
+import java.util.List;
+
+/*
+ * This OpMode illustrates the basics of using both AprilTag recognition and TensorFlow
+>>>>>>> 9201a94 (Add new repo)
  * Object Detection.
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
@@ -54,17 +64,29 @@ public class ConceptDoubleVision extends LinearOpMode {
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
     /**
+<<<<<<< HEAD
      * {@link #aprilTag} is the variable to store our instance of the AprilTag processor.
+=======
+     * The variable to store our instance of the AprilTag processor.
+>>>>>>> 9201a94 (Add new repo)
      */
     private AprilTagProcessor aprilTag;
 
     /**
+<<<<<<< HEAD
      * {@link #tfod} is the variable to store our instance of the TensorFlow Object Detection processor.
+=======
+     * The variable to store our instance of the TensorFlow Object Detection processor.
+>>>>>>> 9201a94 (Add new repo)
      */
     private TfodProcessor tfod;
 
     /**
+<<<<<<< HEAD
      * {@link #myVisionPortal} is the variable to store our instance of the vision portal.
+=======
+     * The variable to store our instance of the vision portal.
+>>>>>>> 9201a94 (Add new repo)
      */
     private VisionPortal myVisionPortal;
 
@@ -122,7 +144,11 @@ public class ConceptDoubleVision extends LinearOpMode {
 
 
     /**
+<<<<<<< HEAD
      * Function to initialize AprilTag and TFOD.
+=======
+     * Initialize AprilTag and TFOD.
+>>>>>>> 9201a94 (Add new repo)
      */
     private void initDoubleVision() {
         // -----------------------------------------------------------------------------------------
@@ -157,7 +183,11 @@ public class ConceptDoubleVision extends LinearOpMode {
     }   // end initDoubleVision()
 
     /**
+<<<<<<< HEAD
      * Function to add telemetry about AprilTag detections.
+=======
+     * Add telemetry about AprilTag detections.
+>>>>>>> 9201a94 (Add new repo)
      */
     private void telemetryAprilTag() {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -179,7 +209,11 @@ public class ConceptDoubleVision extends LinearOpMode {
     }   // end method telemetryAprilTag()
 
     /**
+<<<<<<< HEAD
      * Function to add telemetry about TensorFlow Object Detection (TFOD) recognitions.
+=======
+     * Add telemetry about TensorFlow Object Detection (TFOD) recognitions.
+>>>>>>> 9201a94 (Add new repo)
      */
     private void telemetryTfod() {
         List<Recognition> currentRecognitions = tfod.getRecognitions();

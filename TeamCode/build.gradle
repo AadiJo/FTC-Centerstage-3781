@@ -23,10 +23,25 @@ android {
     }
 }
 
+<<<<<<< HEAD
 dependencies {
     implementation project(':FtcRobotController')
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 }
 dependencies {
     implementation 'org.openftc:easyopencv:1.7.0'
+=======
+repositories {
+    maven {
+        url = 'https://maven.brott.dev/'
+    }
+}
+
+dependencies {
+    implementation project(':FtcRobotController')
+    annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
+
+    implementation "com.acmerobotics.roadrunner:ftc:0.1.7"
+    implementation "com.acmerobotics.dashboard:dashboard:0.4.13"
+>>>>>>> 9201a94 (Add new repo)
 }

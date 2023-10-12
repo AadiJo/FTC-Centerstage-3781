@@ -36,7 +36,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9201a94 (Add new repo)
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -44,11 +47,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 /*
+<<<<<<< HEAD
  * This is an example LinearOpMode that shows how to use Kauai Labs navX Micro Robotics Navigation
  * Sensor. It assumes that the sensor is configured with a name of "navx".
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
+=======
+ * This OpMode shows how to use Kauai Labs navX Micro Robotics Navigation
+ * Sensor. It assumes that the sensor is configured with a name of "navx".
+ *
+ * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
+ * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
+>>>>>>> 9201a94 (Add new repo)
  */
 @TeleOp(name = "Sensor: KL navX Micro", group = "Sensor")
 @Disabled

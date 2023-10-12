@@ -33,14 +33,21 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9201a94 (Add new repo)
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.concurrent.TimeUnit;
 
 /*
+<<<<<<< HEAD
  * Display patterns of a REV Robotics Blinkin LED Driver.
+=======
+ * This OpMode demonstrates use of the REV Robotics Blinkin LED Driver.
+>>>>>>> 9201a94 (Add new repo)
  * AUTO mode cycles through all of the patterns.
  * MANUAL mode allows the user to manually change patterns using the
  * left and right bumpers of a gamepad.

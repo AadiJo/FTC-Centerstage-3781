@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
+<<<<<<< HEAD
     android:versionCode="50"
           android:versionName="8.2">
+=======
+    android:versionCode="52"
+          android:versionName="9.0.1">
+>>>>>>> 9201a94 (Add new repo)
 
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 

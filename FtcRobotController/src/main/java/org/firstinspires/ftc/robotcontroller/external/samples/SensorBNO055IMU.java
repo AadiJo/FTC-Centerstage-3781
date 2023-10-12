@@ -34,7 +34,10 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9201a94 (Add new repo)
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -46,19 +49,32 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import java.util.Locale;
 
+<<<<<<< HEAD
 /**
  * {@link SensorBNO055IMU} gives a short demo on how to use the BNO055 Inertial Motion Unit (IMU) from AdaFruit.
+=======
+/*
+ * This OpMode gives a short demo on how to use the BNO055 Inertial Motion Unit (IMU) from AdaFruit.
+>>>>>>> 9201a94 (Add new repo)
  *
  * Note: this is a Legacy example that will not work with newer Control/Expansion Hubs that use a different IMU
  * Please use the new SensorIMUOrthogonal or SensorIMUNonOrthogonal samples for a more universal IMU interface.
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
+<<<<<<< HEAD
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
+=======
+ * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
+>>>>>>> 9201a94 (Add new repo)
  *
  * @see <a href="http://www.adafruit.com/products/2472">Adafruit IMU</a>
  */
 @TeleOp(name = "Sensor: BNO055 IMU", group = "Sensor")
+<<<<<<< HEAD
 @Disabled   // Comment this out to add to the opmode list
+=======
+@Disabled   // Comment this out to add to the OpMode list
+>>>>>>> 9201a94 (Add new repo)
 public class SensorBNO055IMU extends LinearOpMode
     {
     //----------------------------------------------------------------------------------------------
@@ -84,7 +100,11 @@ public class SensorBNO055IMU extends LinearOpMode
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+<<<<<<< HEAD
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+=======
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample OpMode
+>>>>>>> 9201a94 (Add new repo)
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();

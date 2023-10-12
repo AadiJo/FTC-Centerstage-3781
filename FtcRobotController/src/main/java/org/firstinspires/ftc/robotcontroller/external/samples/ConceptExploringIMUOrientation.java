@@ -37,11 +37,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9201a94 (Add new repo)
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+<<<<<<< HEAD
 /**
  * This file demonstrates the impact of setting the IMU orientation correctly or incorrectly. This
  * code assumes there is an IMU configured with the name "imu".
@@ -53,10 +57,24 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * This sample enables you to re-specify the Hub Mounting orientation dynamically by using gamepad controls.
  * While doing so, the sample will display how Pitch, Roll and Yaw angles change as the hub is moved.
  * <p>
+=======
+/*
+ * This OpMode demonstrates the impact of setting the IMU orientation correctly or incorrectly. This
+ * code assumes there is an IMU configured with the name "imu".
+ *
+ * Note: This OpMode is more of a tool than a code sample. The User Interface portion of this code
+ *       goes beyond simply showing how to interface to the IMU.<br>
+ *       For a minimal example of interfacing to an IMU, please see the SensorIMUOrthogonal or SensorIMUNonOrthogonal sample OpModes.
+ *
+ * This OpMode enables you to re-specify the Hub Mounting orientation dynamically by using gamepad controls.
+ * While doing so, the sample will display how Pitch, Roll and Yaw angles change as the hub is moved.
+ *
+>>>>>>> 9201a94 (Add new repo)
  * The gamepad controls let you change the two parameters that specify how the Control/Expansion Hub is mounted. <br>
  * The first parameter specifies which direction the printed logo on the Hub is pointing. <br>
  * The second parameter specifies which direction the USB connector on the Hub is pointing. <br>
  * All directions are relative to the robot, and left/right is as viewed from behind the robot.
+<<<<<<< HEAD
  * <p>
  * How will you know if you have chosen the correct Orientation? With the correct orientation
  * parameters selected, pitch/roll/yaw should act as follows:
@@ -67,6 +85,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * <p>
  * The Yaw can be reset (to zero) by pressing the Y button on the gamepad (Triangle on a PS4 controller)
  * <p>
+=======
+ *
+ * How will you know if you have chosen the correct Orientation? With the correct orientation
+ * parameters selected, pitch/roll/yaw should act as follows:
+ *
+ *   Pitch value should INCREASE as the robot is tipped UP at the front. (Rotation about X) <br>
+ *   Roll value should INCREASE as the robot is tipped UP at the left side. (Rotation about Y) <br>
+ *   Yaw value should INCREASE as the robot is rotated Counter Clockwise. (Rotation about Z) <br>
+ *
+ * The Yaw can be reset (to zero) by pressing the Y button on the gamepad (Triangle on a PS4 controller)
+ *
+>>>>>>> 9201a94 (Add new repo)
  * The rotational velocities should follow the change in corresponding axes.
  */
 
@@ -79,7 +109,11 @@ public class ConceptExploringIMUOrientation extends LinearOpMode {
             = RevHubOrientationOnRobot.UsbFacingDirection.values();
     static int LAST_DIRECTION = logoFacingDirections.length - 1;
     static float TRIGGER_THRESHOLD = 0.2f;
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> 9201a94 (Add new repo)
     IMU imu;
     int logoFacingDirectionPosition;
     int usbFacingDirectionPosition;

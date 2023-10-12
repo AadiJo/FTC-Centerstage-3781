@@ -29,13 +29,19 @@
 
 package org.firstinspires.ftc.robotcontroller.external.samples;
 
+<<<<<<< HEAD
 import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
+=======
+>>>>>>> 9201a94 (Add new repo)
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ReadWriteFile;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9201a94 (Add new repo)
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -46,13 +52,19 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import java.io.File;
 import java.util.Locale;
 
+<<<<<<< HEAD
 /**
  * {@link SensorBNO055IMUCalibration} calibrates the IMU accelerometer per
+=======
+/*
+ * This OpMode calibrates a BNO055 IMU per
+>>>>>>> 9201a94 (Add new repo)
  * "Section 3.11 Calibration" of the BNO055 specification.
  *
  *  Note: this is a Legacy example that will not work with newer Control/Expansion Hubs that use a different IMU
  *  Please use the new SensorIMUOrthogonal or SensorIMUNonOrthogonal samples for a more universal IMU interface.
  *
+<<<<<<< HEAD
  * <p>Manual calibration of the IMU is definitely NOT necessary: except for the magnetometer
  * (which is not used by the default {@link BNO055IMU.SensorMode#IMU
  * SensorMode#IMU}), the BNO055 is internally self-calibrating and thus can be very successfully
@@ -103,6 +115,55 @@ import java.util.Locale;
  */
 @TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "Sensor")
 @Disabled                            // Uncomment this to add to the opmode list
+=======
+ * Manual calibration of the IMU is definitely NOT necessary: except for the magnetometer (which is not used by the
+ * default "IMU" SensorMode), the BNO055 is internally self-calibrating and thus can be very successfully used without
+ * manual intervention. That said, performing a one-time calibration, saving the results persistently, then loading them
+ * again at each run can help reduce the time that automatic calibration requires.
+ *
+ * This summary of the calibration process from Intel is informative:
+ * http://iotdk.intel.com/docs/master/upm/classupm_1_1_b_n_o055.html
+ *
+ * "This device requires calibration in order to operate accurately. [...] Calibration data is
+ * lost on a power cycle. See one of the examples for a description of how to calibrate the device,
+ * but in essence:
+ *
+ * There is a calibration status register available [...] that returns the calibration status
+ * of the accelerometer (ACC), magnetometer (MAG), gyroscope (GYR), and overall system (SYS).
+ * Each of these values range from 0 (uncalibrated) to 3 (fully calibrated). Calibration [ideally]
+ * involves certain motions to get all 4 values at 3. The motions are as follows (though see the
+ * datasheet for more information):
+ *
+ *     1. GYR: Simply let the sensor sit flat for a few seconds.</ol>
+ *     2. ACC: Move the sensor in various positions. Start flat, then rotate slowly by 45
+ *             degrees, hold for a few seconds, then continue rotating another 45 degrees and
+ *             hold, etc. 6 or more movements of this type may be required. You can move through
+ *             any axis you desire, but make sure that the device is lying at least once
+ *             perpendicular to the x, y, and z axis.</ol>
+ *     3. MAG: Move slowly in a figure 8 pattern in the air, until the calibration values reaches 3.</ol>
+ *     4. SYS: This will usually reach 3 when the other items have also reached 3. If not, continue
+ *             slowly moving the device though various axes until it does."</ol>
+ *
+ * To calibrate the IMU, run this sample OpMode with a gamepad attached to the driver station.
+ * Once the IMU has reached sufficient calibration as reported on telemetry, press the 'A'
+ * button on the gamepad to write the calibration to a file. That file can then be indicated
+ * later when running an OpMode which uses the IMU.
+ *
+ * Note: if your intended uses of the IMU do not include use of all its sensors (for example,
+ * you might not use the magnetometer), then it makes little sense for you to wait for full
+ * calibration of the sensors you are not using before saving the calibration data. Indeed,
+ * it appears that in a SensorMode that doesn't use the magnetometer (for example), the
+ * magnetometer cannot actually be calibrated.
+ *
+ * References:
+ * The AdafruitBNO055IMU Javadoc
+ * The BNO055IMU.Parameters.calibrationDataFile Javadoc
+ * The BNO055 product page: https://www.bosch-sensortec.com/bst/products/all_products/bno055
+ * The BNO055 datasheet: https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bno055-ds000.pdf
+ */
+@TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "Sensor")
+@Disabled                            // Uncomment this to add to the OpMode list
+>>>>>>> 9201a94 (Add new repo)
 public class SensorBNO055IMUCalibration extends LinearOpMode
     {
     //----------------------------------------------------------------------------------------------
@@ -125,7 +186,11 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
         telemetry.log().add("");
         telemetry.log().add("Please refer to the calibration instructions");
         telemetry.log().add("contained in the Adafruit IMU calibration");
+<<<<<<< HEAD
         telemetry.log().add("sample opmode.");
+=======
+        telemetry.log().add("sample OpMode.");
+>>>>>>> 9201a94 (Add new repo)
         telemetry.log().add("");
         telemetry.log().add("When sufficient calibration has been reached,");
         telemetry.log().add("press the 'A' button to write the current");
@@ -159,7 +224,11 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
 
                 // Save the calibration data to a file. You can choose whatever file
                 // name you wish here, but you'll want to indicate the same file name
+<<<<<<< HEAD
                 // when you initialize the IMU in an opmode in which it is used. If you
+=======
+                // when you initialize the IMU in an OpMode in which it is used. If you
+>>>>>>> 9201a94 (Add new repo)
                 // have more than one IMU on your robot, you'll of course want to use
                 // different configuration file names for each.
                 String filename = "AdafruitIMUCalibration.json";
@@ -232,4 +301,8 @@ public class SensorBNO055IMUCalibration extends LinearOpMode
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 9201a94 (Add new repo)

@@ -34,11 +34,16 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+<<<<<<< HEAD
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * Demonstrates empty OpMode
+=======
+/*
+ * Demonstrates an empty iterative OpMode
+>>>>>>> 9201a94 (Add new repo)
  */
 @TeleOp(name = "Concept: NullOp", group = "Concept")
 @Disabled
@@ -46,34 +51,72 @@ public class ConceptNullOp extends OpMode {
 
   private ElapsedTime runtime = new ElapsedTime();
 
+<<<<<<< HEAD
+=======
+  /**
+   * This method will be called once, when the INIT button is pressed.
+   */
+>>>>>>> 9201a94 (Add new repo)
   @Override
   public void init() {
     telemetry.addData("Status", "Initialized");
   }
 
+<<<<<<< HEAD
   /*
      * Code to run when the op mode is first enabled goes here
      * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
      */
+=======
+  /**
+   * This method will be called repeatedly during the period between when
+   * the init button is pressed and when the play button is pressed (or the
+   * OpMode is stopped).
+   */
+>>>>>>> 9201a94 (Add new repo)
   @Override
   public void init_loop() {
   }
 
+<<<<<<< HEAD
   /*
    * This method will be called ONCE when start is pressed
    * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#loop()
+=======
+  /**
+   * This method will be called once, when the play button is pressed.
+>>>>>>> 9201a94 (Add new repo)
    */
   @Override
   public void start() {
     runtime.reset();
   }
 
+<<<<<<< HEAD
   /*
    * This method will be called repeatedly in a loop
    * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#loop()
+=======
+  /**
+   * This method will be called repeatedly during the period between when
+   * the play button is pressed and when the OpMode is stopped.
+>>>>>>> 9201a94 (Add new repo)
    */
   @Override
   public void loop() {
     telemetry.addData("Status", "Run Time: " + runtime.toString());
   }
+<<<<<<< HEAD
+=======
+
+  /**
+   * This method will be called once, when this OpMode is stopped.
+   * <p>
+   * Your ability to control hardware from this method will be limited.
+   */
+  @Override
+  public void stop() {
+
+  }
+>>>>>>> 9201a94 (Add new repo)
 }

@@ -33,19 +33,30 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+<<<<<<< HEAD
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+=======
+import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
+import com.qualcomm.robotcore.util.ElapsedTime;
+>>>>>>> 9201a94 (Add new repo)
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 /*
+<<<<<<< HEAD
  * This is an example LinearOpMode that shows how to use the Modern Robotics Gyro.
  *
  * The op mode assumes that the gyro sensor is attached to a Device Interface Module
+=======
+ * This OpMode shows how to use the Modern Robotics Gyro.
+ *
+ * The OpMode assumes that the gyro sensor is attached to a Device Interface Module
+>>>>>>> 9201a94 (Add new repo)
  * I2C channel and is configured with a name of "gyro".
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
@@ -55,7 +66,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 @Disabled
 public class SensorMRGyro extends LinearOpMode {
 
+<<<<<<< HEAD
   /** In this sample, for illustration purposes we use two interfaces on the one gyro object.
+=======
+  /* In this sample, for illustration purposes we use two interfaces on the one gyro object.
+>>>>>>> 9201a94 (Add new repo)
    * That's likely atypical: you'll probably use one or the other in any given situation,
    * depending on what you're trying to do. {@link IntegratingGyroscope} (and it's base interface,
    * {@link Gyroscope}) are common interfaces supported by possibly several different gyro

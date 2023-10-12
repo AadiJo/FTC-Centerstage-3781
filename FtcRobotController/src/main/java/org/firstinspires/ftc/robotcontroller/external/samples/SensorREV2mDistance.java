@@ -33,6 +33,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.firstinspires.ftc.robotcontroller.external.samples;
 
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+<<<<<<< HEAD
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -50,21 +51,50 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  *
  * @see <a href="http://revrobotics.com">REV Robotics Web Page</a>
+=======
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
+/*
+ * This OpMode illustrates how to use the REV Robotics 2M Distance Sensor.
+ *
+ * The OpMode assumes that the sensor is configured with a name of "sensor_distance".
+ *
+ * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
+ * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
+ *
+ * See the sensor's product page: https://www.revrobotics.com/rev-31-1505/
+>>>>>>> 9201a94 (Add new repo)
  */
 @TeleOp(name = "Sensor: REV2mDistance", group = "Sensor")
 @Disabled
 public class SensorREV2mDistance extends LinearOpMode {
 
+<<<<<<< HEAD
     private DistanceSensor sensorRange;
+=======
+    private DistanceSensor sensorDistance;
+>>>>>>> 9201a94 (Add new repo)
 
     @Override
     public void runOpMode() {
         // you can use this as a regular DistanceSensor.
+<<<<<<< HEAD
         sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
 
         // you can also cast this to a Rev2mDistanceSensor if you want to use added
         // methods associated with the Rev2mDistanceSensor class.
         Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sensorRange;
+=======
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
+
+        // you can also cast this to a Rev2mDistanceSensor if you want to use added
+        // methods associated with the Rev2mDistanceSensor class.
+        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
+>>>>>>> 9201a94 (Add new repo)
 
         telemetry.addData(">>", "Press start to continue");
         telemetry.update();
@@ -72,11 +102,19 @@ public class SensorREV2mDistance extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()) {
             // generic DistanceSensor methods.
+<<<<<<< HEAD
             telemetry.addData("deviceName",sensorRange.getDeviceName() );
             telemetry.addData("range", String.format("%.01f mm", sensorRange.getDistance(DistanceUnit.MM)));
             telemetry.addData("range", String.format("%.01f cm", sensorRange.getDistance(DistanceUnit.CM)));
             telemetry.addData("range", String.format("%.01f m", sensorRange.getDistance(DistanceUnit.METER)));
             telemetry.addData("range", String.format("%.01f in", sensorRange.getDistance(DistanceUnit.INCH)));
+=======
+            telemetry.addData("deviceName", sensorDistance.getDeviceName() );
+            telemetry.addData("range", String.format("%.01f mm", sensorDistance.getDistance(DistanceUnit.MM)));
+            telemetry.addData("range", String.format("%.01f cm", sensorDistance.getDistance(DistanceUnit.CM)));
+            telemetry.addData("range", String.format("%.01f m", sensorDistance.getDistance(DistanceUnit.METER)));
+            telemetry.addData("range", String.format("%.01f in", sensorDistance.getDistance(DistanceUnit.INCH)));
+>>>>>>> 9201a94 (Add new repo)
 
             // Rev2mDistanceSensor specific methods.
             telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
@@ -86,4 +124,8 @@ public class SensorREV2mDistance extends LinearOpMode {
         }
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 9201a94 (Add new repo)

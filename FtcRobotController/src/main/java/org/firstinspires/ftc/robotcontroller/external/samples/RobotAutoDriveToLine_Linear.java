@@ -32,15 +32,24 @@ package org.firstinspires.ftc.robotcontroller.external.samples;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+<<<<<<< HEAD
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
+=======
+import com.qualcomm.robotcore.hardware.DcMotor;
+>>>>>>> 9201a94 (Add new repo)
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 
+<<<<<<< HEAD
 /**
  * This file illustrates the concept of driving up to a line and then stopping.
+=======
+/*
+ * This OpMode illustrates the concept of driving up to a line and then stopping.
+>>>>>>> 9201a94 (Add new repo)
  * The code is structured as a LinearOpMode
  *
  * The Sensor used here can be a REV Color Sensor V2 or V3.  Make sure the white LED is turned on.
@@ -70,7 +79,11 @@ public class RobotAutoDriveToLine_Linear extends LinearOpMode {
     private DcMotor         leftDrive   = null;
     private DcMotor         rightDrive  = null;
 
+<<<<<<< HEAD
     /** The colorSensor field will contain a reference to our color sensor hardware object */
+=======
+    /** The variable to store a reference to our color sensor hardware object */
+>>>>>>> 9201a94 (Add new repo)
     NormalizedColorSensor colorSensor;
 
     static final double     WHITE_THRESHOLD = 0.5;  // spans between 0.0 - 1.0 from dark to light

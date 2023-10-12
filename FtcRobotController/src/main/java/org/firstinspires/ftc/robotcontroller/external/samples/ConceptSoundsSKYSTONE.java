@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.robotcontroller.external.samples;
 
 import android.content.Context;
+<<<<<<< HEAD
 
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -38,6 +39,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /**
  * This file demonstrates how to play one of the several SKYSTONE/Star Wars sounds loaded into the SDK.
+=======
+import com.qualcomm.ftccommon.SoundPlayer;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+/*
+ * This OpMode demonstrates how to play one of the several SKYSTONE/Star Wars sounds loaded into the SDK.
+>>>>>>> 9201a94 (Add new repo)
  * It does this by creating a simple "chooser" controlled by the gamepad Up Down buttons.
  * This code also prevents sounds from stacking up by setting a "playing" flag, which is cleared when the sound finishes playing.
  *

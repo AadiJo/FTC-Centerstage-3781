@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.robotcontroller.external.samples;
 
+<<<<<<< HEAD
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -8,6 +9,15 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * This sample illustrates using the touchpad feature found on some gamepads.
+=======
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+/*
+ * This OpMode illustrates using the touchpad feature found on some gamepads.
+>>>>>>> 9201a94 (Add new repo)
  *
  * The Sony PS4 gamepad can detect two distinct touches on the central touchpad.
  * Other gamepads with different touchpads may provide mixed results.

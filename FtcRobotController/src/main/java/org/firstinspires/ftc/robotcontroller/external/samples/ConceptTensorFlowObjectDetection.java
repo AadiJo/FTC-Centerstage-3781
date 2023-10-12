@@ -32,15 +32,25 @@ package org.firstinspires.ftc.robotcontroller.external.samples;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+<<<<<<< HEAD
 import java.util.List;
+=======
+>>>>>>> 9201a94 (Add new repo)
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
+<<<<<<< HEAD
 /**
  * This 2023-2024 OpMode illustrates the basics of TensorFlow Object Detection,
+=======
+import java.util.List;
+
+/*
+ * This OpMode illustrates the basics of TensorFlow Object Detection,
+>>>>>>> 9201a94 (Add new repo)
  * including Java Builder structures for specifying Vision parameters.
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
@@ -52,13 +62,33 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
+<<<<<<< HEAD
     /**
      * {@link #tfod} is the variable to store our instance of the TensorFlow Object Detection processor.
+=======
+    // TFOD_MODEL_ASSET points to a model file stored in the project Asset location,
+    // this is only used for Android Studio when using models in Assets.
+    private static final String TFOD_MODEL_ASSET = "MyModelStoredAsAsset.tflite";
+    // TFOD_MODEL_FILE points to a model file stored onboard the Robot Controller's storage,
+    // this is used when uploading models directly to the RC using the model upload interface.
+    private static final String TFOD_MODEL_FILE = "/sdcard/FIRST/tflitemodels/myCustomModel.tflite";
+    // Define the labels recognized in the model for TFOD (must be in training order!)
+    private static final String[] LABELS = {
+       "Pixel",
+    };
+
+    /**
+     * The variable to store our instance of the TensorFlow Object Detection processor.
+>>>>>>> 9201a94 (Add new repo)
      */
     private TfodProcessor tfod;
 
     /**
+<<<<<<< HEAD
      * {@link #visionPortal} is the variable to store our instance of the vision portal.
+=======
+     * The variable to store our instance of the vision portal.
+>>>>>>> 9201a94 (Add new repo)
      */
     private VisionPortal visionPortal;
 
@@ -106,11 +136,24 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
         // Create the TensorFlow processor by using a builder.
         tfod = new TfodProcessor.Builder()
 
+<<<<<<< HEAD
             // Use setModelAssetName() if the TF Model is built in as an asset.
             // Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
             //.setModelAssetName(TFOD_MODEL_ASSET)
             //.setModelFileName(TFOD_MODEL_FILE)
 
+=======
+            // With the following lines commented out, the default TfodProcessor Builder
+            // will load the default model for the season. To define a custom model to load, 
+            // choose one of the following:
+            //   Use setModelAssetName() if the custom TF Model is built in as an asset (AS only).
+            //   Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
+            //.setModelAssetName(TFOD_MODEL_ASSET)
+            //.setModelFileName(TFOD_MODEL_FILE)
+
+            // The following default settings are available to un-comment and edit as needed to 
+            // set parameters for custom models.
+>>>>>>> 9201a94 (Add new repo)
             //.setModelLabels(LABELS)
             //.setIsModelTensorFlow2(true)
             //.setIsModelQuantized(true)
@@ -133,7 +176,11 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
         //builder.setCameraResolution(new Size(640, 480));
 
         // Enable the RC preview (LiveView).  Set "false" to omit camera monitoring.
+<<<<<<< HEAD
         //builder.enableCameraMonitoring(true);
+=======
+        //builder.enableLiveView(true);
+>>>>>>> 9201a94 (Add new repo)
 
         // Set the stream format; MJPEG uses less bandwidth than default YUY2.
         //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
@@ -158,7 +205,11 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
     }   // end method initTfod()
 
     /**
+<<<<<<< HEAD
      * Function to add telemetry about TensorFlow Object Detection (TFOD) recognitions.
+=======
+     * Add telemetry about TensorFlow Object Detection (TFOD) recognitions.
+>>>>>>> 9201a94 (Add new repo)
      */
     private void telemetryTfod() {
 

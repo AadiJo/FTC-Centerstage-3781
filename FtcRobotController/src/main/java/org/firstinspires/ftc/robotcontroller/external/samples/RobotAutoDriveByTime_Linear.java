@@ -35,8 +35,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+<<<<<<< HEAD
 /**
  * This file illustrates the concept of driving a path based on time.
+=======
+/*
+ * This OpMode illustrates the concept of driving a path based on time.
+>>>>>>> 9201a94 (Add new repo)
  * The code is structured as a LinearOpMode
  *
  * The code assumes that you do NOT have encoders on the wheels,

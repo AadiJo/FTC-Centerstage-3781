@@ -33,11 +33,18 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+<<<<<<< HEAD
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
+=======
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+/*
+ * This OpMode illustrates the concept of driving a path based on encoder counts.
+>>>>>>> 9201a94 (Add new repo)
  * The code is structured as a LinearOpMode
  *
  * The code REQUIRES that you DO have encoders on the wheels,
@@ -59,7 +66,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *  This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
+<<<<<<< HEAD
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
+=======
+ * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
+>>>>>>> 9201a94 (Add new repo)
  */
 
 @Autonomous(name="Robot: Auto Drive By Encoder", group="Robot")
@@ -131,7 +142,11 @@ public class RobotAutoDriveByEncoder_Linear extends LinearOpMode {
      *  Move will stop if any of three conditions occur:
      *  1) Move gets to the desired position
      *  2) Move runs out of time
+<<<<<<< HEAD
      *  3) Driver stops the opmode running.
+=======
+     *  3) Driver stops the OpMode running.
+>>>>>>> 9201a94 (Add new repo)
      */
     public void encoderDrive(double speed,
                              double leftInches, double rightInches,
@@ -139,7 +154,11 @@ public class RobotAutoDriveByEncoder_Linear extends LinearOpMode {
         int newLeftTarget;
         int newRightTarget;
 
+<<<<<<< HEAD
         // Ensure that the opmode is still active
+=======
+        // Ensure that the OpMode is still active
+>>>>>>> 9201a94 (Add new repo)
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
