@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import androidx.annotation.NonNull;
 
@@ -51,23 +52,23 @@ import java.util.List;
 public final class MecanumDrive {
     public static class Params {
         // drive model parameters
-        public double inPerTick = 0.06;
-        public double lateralInPerTick = 0.05054320430328376;
-        public double trackWidthTicks = 5375.204043325539;
+        public double inPerTick = 0.0030096922; // 0.0059853691; //0.06;
+        public double lateralInPerTick = 0.002532992185974359; // 0.05054320430328376;
+        public double trackWidthTicks = 5267.9896878328145; // 5880.757709956502; // 5375.204043325539;
 
         // feedforward parameters (in tick units)
-        public double kS = 0.5889280676719042;
-        public double kV = 0.0005933453063074994;
-        public double kA = 0;
+        public double kS = 0.5537657919385788; // 1.059358063305187; // 0.5889280676719042;
+        public double kV = 0.0006119745355373862; // 0.0004904685025687257; // 0.0005933453063074994;
+        public double kA = 0.000;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 50;
-        public double minProfileAccel = -30;
-        public double maxProfileAccel = 50;
+        public double maxWheelVel = 5;
+        public double minProfileAccel = -5;
+        public double maxProfileAccel = 5;
 
         // turn profile parameters (in radians)
-        public double maxAngVel = Math.PI; // shared with path
-        public double maxAngAccel = Math.PI;
+        public double maxAngVel = Math.PI/20; // shared with path  // Slowed down
+        public double maxAngAccel = Math.PI/20;                    // Slowed down
 
         // path controller gains
         public double axialGain = 0.0;
@@ -188,6 +189,11 @@ public final class MecanumDrive {
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
