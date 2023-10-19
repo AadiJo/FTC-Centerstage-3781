@@ -1,14 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -22,6 +28,8 @@ public class CameraAuto extends LinearOpMode {
     CRServo arm;
     Servo clawR;
     Servo clawL;
+    private BHI260IMU imu;
+    Orientation angles = new Orientation();
 
 private DcMotor frontLeft;
 private DcMotor frontRight;
@@ -53,12 +61,20 @@ public double getTargetTicks(double inches){
         backRight = hardwareMap.get(DcMotor.class, "bckRT");
         frontLeft = hardwareMap.get(DcMotor.class, "frntLF");
         frontRight = hardwareMap.get(DcMotor.class, "frntRT");
-        leftEncoder = hardwareMap.get(DcMotor.class, "leftEncoder");
-        rightEncoder = hardwareMap.get(DcMotor.class, "rightEncoder");
-        midEncoder = hardwareMap.get(DcMotor.class, "frontEncoder");
+        leftEncoder = hardwareMap.get(DcMotorEx.class, "leftEncoder");
+        rightEncoder = hardwareMap.get(DcMotorEx.class, "rightEncoder");
+        midEncoder = hardwareMap.get(DcMotorEx.class, "frontEncoder");
         arm = hardwareMap.crservo.get("arm");
         clawR = hardwareMap.servo.get("clawR");
         clawL = hardwareMap.servo.get("clawL");
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+        //initialize imu
+        imu = hardwareMap.get(BHI260IMU.class,"imu");
+        imu.initialize(parameters);
+        imu.resetYaw();
+
         backRight.setDirection(DcMotorSimple.Direction.FORWARD);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -83,28 +99,45 @@ public double getTargetTicks(double inches){
 
 
         });
-        clawR.setPosition(1);
-        clawL.setPosition(0);
+
         telemetry.addLine("left "+pipeline.leftavgfinal);
         telemetry.addLine("right "+pipeline.rightavgfinal);
         telemetry.addLine("middle"+pipeline.midavgfinal);
         telemetry.update();
         waitForStart();
         time.reset();
-while (time.seconds() < 2){
+        leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);//left movement is positive
+        midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+while(leftEncoder.getCurrentPosition() < getTargetTicks(18)){
     setPowerToAllMotorsTo(.2);
 }
         setPowerToAllMotorsTo(0);
 
-        leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);//left movement is positive
-        midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
 
 
 
         if(pipeline.position == 1) {
             telemetry.addLine("left");
-            telemetry.update();}
+            telemetry.update();
+            while( imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < 90){
+                backLeft.setPower(-.2);
+                backRight.setPower(.2);
+                frontLeft.setPower(-.2);
+                frontRight.setPower(.2);
+            }
+            setPowerToAllMotorsTo(0);
+            imu.resetYaw();
+            leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);//left movement is positive
+            midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            while( rightEncoder.getCurrentPosition() < getTargetTicks(9)){
+                setPowerToAllMotorsTo(.2);
+
+        }
+        setPowerToAllMotorsTo(0);
+        }
 
         else if (pipeline.position == 3){
         telemetry.addLine("Right");
@@ -127,9 +160,7 @@ while (time.seconds() < 2){
             while(time.seconds() < 2.8){
                 arm.setPower(1);
             }
-            arm.setPower(0);
-            clawR.setPosition(0);
-            clawL.setPosition(1);
+
 
 
         }
