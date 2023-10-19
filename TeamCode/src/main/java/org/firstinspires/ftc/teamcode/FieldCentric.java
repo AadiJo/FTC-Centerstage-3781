@@ -107,7 +107,7 @@ private CRServo arm;
         }
     }
 
-    private double calcBotXSpeedNew(double stickX, double stickY, double botHeading){
+    public double calcBotXSpeedNew(double stickX, double stickY, double botHeading){
 
         return (stickX * Math.cos(-botHeading) - stickY * Math.sin(-botHeading));
 
@@ -125,7 +125,7 @@ private CRServo arm;
         }
     }
 
-    private double calcBotYSpeedNew(double stickX, double stickY, double botHeading){
+    public double calcBotYSpeedNew(double stickX, double stickY, double botHeading){
 
         return (stickX * Math.sin(-botHeading) + stickY * Math.cos(-botHeading));
 
