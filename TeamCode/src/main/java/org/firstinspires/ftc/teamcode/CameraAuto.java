@@ -53,9 +53,9 @@ public double getTargetTicks(double inches){
     public void runOpMode() throws InterruptedException {
         ElapsedTime time = new ElapsedTime();
 
-            //WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam_1");
-            int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
-            webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam_1"), cameraMonitorViewId);
+        //WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam_1");
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam_1"), cameraMonitorViewId);
 
         backLeft = hardwareMap.get(DcMotor.class, "bckLF");
         backRight = hardwareMap.get(DcMotor.class, "bckRT");
@@ -71,7 +71,7 @@ public double getTargetTicks(double inches){
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         //initialize imu
-        imu = hardwareMap.get(BHI260IMU.class,"imu");
+        imu = hardwareMap.get(BHI260IMU.class, "imu");
         imu.initialize(parameters);
         imu.resetYaw();
 
@@ -85,43 +85,41 @@ public double getTargetTicks(double inches){
         rightEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 //        webcam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-            examplePipeline pipeline = new examplePipeline();
+        examplePipeline pipeline = new examplePipeline();
 
-            webcam.setPipeline(pipeline);
-            webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        webcam.setPipeline(pipeline);
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                webcam.startStreaming(640,360,OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
             }
-            public void onError(int n){
+
+            public void onError(int n) {
 
             }
 
 
         });
 
-        telemetry.addLine("left "+pipeline.leftavgfinal);
-        telemetry.addLine("right "+pipeline.rightavgfinal);
-        telemetry.addLine("middle"+pipeline.midavgfinal);
+        telemetry.addLine("left " + pipeline.leftavgfinal);
+        telemetry.addLine("right " + pipeline.rightavgfinal);
+        telemetry.addLine("middle" + pipeline.midavgfinal);
         telemetry.update();
         waitForStart();
         time.reset();
         leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);//left movement is positive
         midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-while(leftEncoder.getCurrentPosition() < getTargetTicks(18)){
-    setPowerToAllMotorsTo(.2);
-}
+        while (leftEncoder.getCurrentPosition() < getTargetTicks(18)) {
+            setPowerToAllMotorsTo(.2);
+        }
         setPowerToAllMotorsTo(0);
 
 
-
-
-
-        if(pipeline.position == 1) {
+        if (pipeline.position == 1) {
             telemetry.addLine("left");
             telemetry.update();
-            while( imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < 90){
+            while (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > -90) {
                 backLeft.setPower(-.2);
                 backRight.setPower(.2);
                 frontLeft.setPower(-.2);
@@ -132,51 +130,65 @@ while(leftEncoder.getCurrentPosition() < getTargetTicks(18)){
             leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);//left movement is positive
             midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            while( rightEncoder.getCurrentPosition() < getTargetTicks(9)){
+            while (rightEncoder.getCurrentPosition() < getTargetTicks(9)) {
                 setPowerToAllMotorsTo(.2);
 
-        }
-        setPowerToAllMotorsTo(0);
-        }
-
-        else if (pipeline.position == 3){
-        telemetry.addLine("Right");
-        telemetry.update();
-        }
-
-        else if(pipeline.position == 2) {
-            telemetry.addLine("middle");
-            telemetry.update();
-            time.reset();
-            while(time.seconds()<3){
-                setPowerToAllMotorsTo(.4);
-            }
-            time.reset();
-            while(time.seconds()<2){
-                setPowerToAllMotorsTo(-.4);
             }
             setPowerToAllMotorsTo(0);
-            time.reset();
-            while(time.seconds() < 2.8){
-                arm.setPower(1);
+
+            sleep(600);
+            leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);//left movement is positive
+            midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            while (rightEncoder.getCurrentPosition() > getTargetTicks(-9)) {
+                setPowerToAllMotorsTo(.2);
+
+            }
+            setPowerToAllMotorsTo(0);
+
+            telemetry.addLine("this is a tesr oj");
+            telemetry.update();
+
+
+        } else if (pipeline.position == 3) {
+            telemetry.addLine("Right");
+            telemetry.update();
+            while (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < 90) {
+                backLeft.setPower(-.2);
+                backRight.setPower(.2);
+                frontLeft.setPower(-.2);
+                frontRight.setPower(.2);
             }
 
+            setPowerToAllMotorsTo(0);
+        } else if (pipeline.position == 2) {
+            telemetry.addLine("middle");
+            telemetry.update();
+            leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);//left movement is positive
+            midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+            while(rightEncoder.getCurrentPosition() < getTargetTicks(9)){
+               setPowerToAllMotorsTo(.2);
 
         }
-        telemetry.addLine(""+pipeline.leftavgfinal);
-        telemetry.addLine(""+pipeline.rightavgfinal);
-        telemetry.addLine(""+pipeline.midavgfinal);
+            leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);//left movement is positive
+            midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            while(rightEncoder.getCurrentPosition() > getTargetTicks(-9)){
+                setPowerToAllMotorsTo(.2);
 
+            }
+            setPowerToAllMotorsTo(0);
+
+        telemetry.addLine("" + pipeline.leftavgfinal);
+        telemetry.addLine("" + pipeline.rightavgfinal);
+        telemetry.addLine("" + pipeline.midavgfinal);
         telemetry.update();
 
-        time.reset();
-        while (!gamepad1.a){}
 
 
-
-
-
+    }
 
 
     }
