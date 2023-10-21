@@ -92,6 +92,8 @@ public double getTargetTicks(double inches){
             @Override
             public void onOpened() {
                 webcam.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
+                telemetry.addLine("hello");
+                telemetry.update();
             }
 
             public void onError(int n) {
@@ -184,12 +186,6 @@ public double getTargetTicks(double inches){
         telemetry.addLine("" + pipeline.leftavgfinal);
         telemetry.addLine("" + pipeline.rightavgfinal);
         telemetry.addLine("" + pipeline.midavgfinal);
-        telemetry.update();
-
-
-
-    }
-
-
+        telemetry.update();}
     }
 }
