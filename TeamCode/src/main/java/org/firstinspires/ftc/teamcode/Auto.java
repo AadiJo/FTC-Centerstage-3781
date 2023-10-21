@@ -407,7 +407,6 @@ public class Auto  extends LinearOpMode {
             midEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-
             if(pipeline.position == 1) {
                 telemetry.addLine("left");
                 telemetry.update();}
@@ -456,8 +455,27 @@ public class Auto  extends LinearOpMode {
 
         }
     }
-//
-//private class LeftRightCenter {
-//        if
-//    }
+
+private class LeftRightCenter {
+        if detected_left {
+        frontLeft.setPower(//);
+        frontRight.setPower(//);
+        backLeft.setPower(//);
+        backRight.setPower(//);
+    }
+        if detected_right {
+        frontLeft.setPower(//);
+        frontRight.setPower(//);
+        backLeft.setPower(//);
+        backRight.setPower(//);
+        }
+        if dectected_center {
+        frontLeft.setPower(//);
+        frontRight.setPower(//);
+        backLeft.setPower(//);
+        backRight.setPower(//);
+
+
+    }
+}
 }

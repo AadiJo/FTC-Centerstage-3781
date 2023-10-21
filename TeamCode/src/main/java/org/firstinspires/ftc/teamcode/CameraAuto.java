@@ -58,11 +58,13 @@ public class CameraAuto extends LinearOpMode {
     }
 }
 class examplePipeline extends OpenCvPipeline{
+    public int position;
     Mat YCbCr = new Mat();
     Mat leftCrop;
     Mat rightCrop;
     double leftavgfinal;
     double rightavgfinal;
+    double midavgfinal;
     Mat output = new Mat();
     Scalar rectColor =  new Scalar(255.0, 0.0, 0.0);
     OpenCvPipeline examplePipeline;
