@@ -62,6 +62,8 @@ public class AutoTest extends LinearOpMode {
         double rightavgfinal;
         double midavgfinal;
 
+        OpenCvCamera webcam = null;
+
         Mat output = new Mat();
         Scalar rectColor =  new Scalar(225,0,0); //225, 0, 0
 //    OpenCvPipeline examplePipeline;
@@ -97,15 +99,15 @@ public class AutoTest extends LinearOpMode {
             rightavgfinal= rightavg.val[0];
             midavgfinal = midavg.val[0];
 
-            if (2*(leftavgfinal)<rightavgfinal +midavgfinal){
+            if ((leftavgfinal)<midavgfinal && leftavgfinal < rightavgfinal){
                 position = 1;
 
             }
-            else if (2*(midavgfinal)<leftavgfinal+rightavgfinal){
+            else if ((midavgfinal)<leftavgfinal && midavgfinal < rightavgfinal){
                 position = 2;
 
             }
-            else if(rightavgfinal*2<leftavgfinal+rightavgfinal){ position = 3;}
+            else if(rightavgfinal<leftavgfinal && rightavgfinal<midavgfinal){ position = 3;}
 
 
             return output;
@@ -120,7 +122,7 @@ public class AutoTest extends LinearOpMode {
 
         ElapsedTime time = new ElapsedTime();
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(-71.90, -36.75, Math.toRadians(0.00)));
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(66.78, -37.02, Math.toRadians(181.10)));
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam_1"), cameraMonitorViewId);
@@ -138,7 +140,6 @@ public class AutoTest extends LinearOpMode {
 
             }
 
-
         });
 
         telemetry.addLine("left " + pipeline.leftavgfinal);
@@ -146,23 +147,25 @@ public class AutoTest extends LinearOpMode {
         telemetry.addLine("middle" + pipeline.midavgfinal);
         telemetry.update();
 
-
-
-
         waitForStart();
 
         time.reset();
 
-        int propDirectionID = pipeline.position;
+        final int propDirectionID = pipeline.position;
 
         telemetry.addData("PropDirectionID", propDirectionID);
         telemetry.update();
 
         Actions.runBlocking(
                 drive.actionBuilder(drive.pose)
-                        .splineTo(new Vector2d(-36.50, -36.50), Math.toRadians(0))
+                        .turn(90)
+                        //.splineTo(new Vector2d(2.33, -37.73), Math.toRadians(124.11))
+                        //.splineTo(new Vector2d(2.05, -3.60), Math.toRadians(81.61))
+                        //.splineTo(new Vector2d(0.21, 55.08), Math.toRadians(90.00))
                         .build()
         );
+
+        telemetry.addData("Heading", drive.pose.heading);
 
         if (propDirectionID == 1){
             // LEFT
@@ -187,7 +190,7 @@ public class AutoTest extends LinearOpMode {
 
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
-                            .splineTo(new Vector2d(-36.50, -36.50), Math.toRadians(270.00))
+                            .turn(90)
                             .build()
             );
 
@@ -200,22 +203,6 @@ public class AutoTest extends LinearOpMode {
 
         }
 
-        sleep(1500);
-
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-                        .splineTo(new Vector2d(-49.63, -36.23), Math.toRadians(180.00))
-                        .splineTo(new Vector2d(-45.41, -57.98), Math.toRadians(-42.66))
-                        .splineTo(new Vector2d(-33.86, -47.46), Math.toRadians(270.00))
-
-                        .build());
-
-        sleep(1500);
-
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-                        .splineTo(new Vector2d(-36.64, 48.50), Math.toRadians(90.00))
-                        .build());
 
     }
 }
