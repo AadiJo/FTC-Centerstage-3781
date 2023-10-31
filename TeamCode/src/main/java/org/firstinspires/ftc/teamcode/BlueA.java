@@ -407,7 +407,10 @@ public class BlueA extends LinearOpMode {
 
         Actions.runBlocking(
                 drive.actionBuilder(drive.pose)
-                        .splineTo(new Vector2d(-8.40, -53.03), Math.toRadians(-77.99))
+                        //.splineTo(new Vector2d(-8.40, -53.03), Math.toRadians(-77.99))
+                        .splineTo(new Vector2d(-22.32, 38.50), Math.toRadians(-17.72))
+                        .splineTo(new Vector2d(-9.53, -3.87), Math.toRadians(-86.93))
+                        .splineTo(new Vector2d(-10.57, -53.96), Math.toRadians(268.59))
                         // TODO Fine tune on field
                         .build()
         );
@@ -427,8 +430,12 @@ public class BlueA extends LinearOpMode {
 
         Actions.runBlocking(
                 drive.actionBuilder(drive.pose)
-                        .splineToConstantHeading(new Vector2d(-11.49, 31.70), Math.toRadians(91.43))
-                        .splineToConstantHeading(new Vector2d(-36.23, 51.49), Math.toRadians(90.00))
+//                        .splineToConstantHeading(new Vector2d(-11.49, 31.70), Math.toRadians(91.43))
+//                        .splineToConstantHeading(new Vector2d(-36.23, 51.49), Math.toRadians(90.00))
+                        // Add extra spline step and reversed for loop; constant heading so it faces same direction
+                        .splineToConstantHeading(new Vector2d(-10.57, -53.96), Math.toRadians(268.59))
+                        .splineToConstantHeading(new Vector2d(-9.53, -3.87), Math.toRadians(-86.93))
+                        .splineToConstantHeading(new Vector2d(-22.32, 38.50), Math.toRadians(-17.72))
                         .build()
 
         );
@@ -483,10 +490,13 @@ public class BlueA extends LinearOpMode {
         dropSecondPxl();
         setupForLoops();
         // loop till T - 5
-        while (opModeIsActive() && time.seconds() < 25){
-            pickAndDropWhitePxl();
-        }
+//        while (opModeIsActive() && time.seconds() < 25){
+//            pickAndDropWhitePxl();
+//        }
         // end loop
+
+        // Only one loop was possible
+        pickAndDropWhitePxl();
         setupForPark();
         park();
 
