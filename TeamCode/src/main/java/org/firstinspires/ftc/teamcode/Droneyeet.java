@@ -10,11 +10,28 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import java.lang.Math;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Droneyeet {
     DcMotor yeetmotor = yeet.motor;
-    yeetmotor.set(0.5)
-}
+    yeetmotor.setPower(1);
+    Servo boosh = boosh;
+    boosh.setPosition(0);
+    boosh.setPosition(0.5);
+    exit();
+} 
+//initialize launch_motor()
+//Start_launch_motor(rpm)
+//initialize servo ()
+// set_servo_limits (min degree, max degree)
+//push_drone(){
+//    move_servo(max)
+//}
+//Stop_servo(){
+    //move_servo(min) 
+// }
+////stop_launch_motor()
+    
