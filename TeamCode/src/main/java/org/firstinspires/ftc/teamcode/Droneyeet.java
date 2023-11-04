@@ -22,7 +22,7 @@ public class Droneyeet {
     Servo boosh = boosh;
     boosh.setPosition(0);
     boosh.setPosition(1);
-    yeetmotor.setPower(0);
+    motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 }
 }
 
