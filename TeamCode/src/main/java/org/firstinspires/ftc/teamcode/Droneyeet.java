@@ -15,10 +15,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 public class Droneyeet {
-    private Servo boosh = new Servo();
-    private yeetmotor = yeetmotor;
-    yeetmotor = hardwareMap.get(DcMotor.class, "yeetmotor");
-    boosh = hardwareMap.get(Servo.class, "boosh");
+    private Servo boosh = hardwareMap.get(Servo.class, "boosh");
+    private DcMotor yeetmotor = hardwareMap.get(DcMotor.class, "yeetmotor");
     while (gamepad1.a) {
         yeetmotor.setPower(1);
         boosh.setPosition(0);
