@@ -18,11 +18,24 @@ public class Droneyeet {
     yeet.motor = hardwareMap.get(DcMotor.class, "yeetmotor");
     boosh = hardwareMap.get(DcMotor.class, "boosh");
     while( gamepad1.a){
-        yeetmotor.setPower(1);
-        Servo boosh = boosh;
-        boosh.setPosition(0);
-        boosh.setPosition(1);
-        yeetmotor.setPower(0);
-    }
+    yeetmotor.setPower(1);
+    Servo boosh = boosh;
+    boosh.setPosition(0);
+    boosh.setPosition(1);
+    yeetmotor.setPower(0);
+}
 }
 
+
+//initialize yeet_motor()√
+//Start_launch_motor(rpm)√
+//initialize servo()√
+// set_servo_limits (min degree, max degree)√
+//push_drone(){
+//    move_servo(max)
+//}√
+//Stop_servo(){
+    //move_servo(min) 
+// }√
+////stop_launch_motor()√
+    
