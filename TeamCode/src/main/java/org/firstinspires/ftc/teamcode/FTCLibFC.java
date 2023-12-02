@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 @TeleOp(name = "TeleOP", group = "Current")
 public class FTCLibFC extends LinearOpMode {
 
+
     // This variable determines whether the following program
     // uses field-centric or robot-centric driving styles. The
     // differences between them can be read here in the docs:
@@ -31,10 +32,14 @@ public class FTCLibFC extends LinearOpMode {
         public double dpSpeed = 0.2;
         public double dpMaxSpeed = 1;
 
+        public double sixtyDegTicks;
+        double ticksPerDeg;
         public double ARM_TICKS_PER_REV = 384.5;
-        public double ARM_DEGREES_PER_MILLISECOND = 0; // TODO ARM_DEGREES_PER_MILLISECOND
-        public double CST_UNIT_PER_DEG = 0; // TODO Calculate value of 0.1 of servo value
-        public double cassetteMoveIncrement = 0;
+        public double ARM_DEGREES_PER_MILLISECOND = 0.0818525; // TODO ARM_DEGREES_PER_MILLISECOND
+        // RPM / 60 -> RPS / 1000 -> RPMS x 11.29 (degrees per rev)
+        public double CST_UNIT_PER_DEG = 1/ 300.0; // TODO Calculate value of 0.1 of servo value
+        // 1 rotation is 270 degrees
+        public double cassetteMoveIncrement = 0.0818525/360 * CST_UNIT_PER_DEG;
 
         double t0 = 0;// time in milliseconds
         double t1 = 0;
@@ -42,6 +47,13 @@ public class FTCLibFC extends LinearOpMode {
     }
 
     public static VARS VARS= new VARS();
+    DcMotorEx armMotor;
+    Servo cassette;
+    public double convertDegToTicks(double deg){
+        return deg * VARS.ticksPerDeg;
+
+    }
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,10 +64,13 @@ public class FTCLibFC extends LinearOpMode {
 
         Servo clawL = hardwareMap.servo.get("clawL");
         Servo clawR = hardwareMap.servo.get("clawR");
-        Servo cassette = hardwareMap.servo.get("cassette");
+         cassette = hardwareMap.servo.get("cassette");
 
         DcMotorEx droneMotor = hardwareMap.get(DcMotorEx.class,"droneMotor");
-        DcMotorEx armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
+         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
+         armMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         {
             leftFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -64,14 +79,15 @@ public class FTCLibFC extends LinearOpMode {
             rightFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
             droneMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            // armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
 
         {
             leftBack.setInverted(true);
             rightBack.setInverted(true);
             rightFront.setInverted(true);
-            armMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            // cassette.setDirection(Servo.Direction.REVERSE);
+            // armMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
         MecanumDrive drive = new MecanumDrive(
@@ -90,10 +106,13 @@ public class FTCLibFC extends LinearOpMode {
 
         // the extended gamepad object
         GamepadEx driverOp = new GamepadEx(gamepad1);
-
         waitForStart();
 
+
+
         while (!isStopRequested()) {
+
+            cassette.setPosition(cassette.getPosition());
 
             telemetry.addData("Heading", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             telemetry.update();
@@ -124,46 +143,59 @@ public class FTCLibFC extends LinearOpMode {
                     clawL.setPosition(0.4);//0
                 }
 
-                if (gamepad2.a) {
+                if (gamepad2.a&&armMotor.getCurrentPosition()>0) {
                     // DOWN
                     // adjust servo
-                    if (VARS.t0 == 0){
-                        VARS.t0 = System.currentTimeMillis();
-                    }else{
-                        VARS.t1 = System.currentTimeMillis();
-                        VARS.elapsedTime = VARS.t1 - VARS.t0;
-                        VARS.t0 = VARS.t1;
-                    }
-                    double CHANGE_IN_ARM_ANGLE = VARS.elapsedTime * VARS.ARM_DEGREES_PER_MILLISECOND;
-                    cassette.setPosition(cassette.getPosition() - (CHANGE_IN_ARM_ANGLE * VARS.CST_UNIT_PER_DEG));
+//                    if (VARS.t0 == 0){
+//                        VARS.t0 = System.currentTimeMillis();
+//                    }else{
+//                        VARS.t1 = System.currentTimeMillis();
+//                        VARS.elapsedTime = VARS.t1 - VARS.t0;
+//                        VARS.t0 = VARS.t1;
+//                    }
+//                    double CHANGE_IN_ARM_ANGLE = VARS.elapsedTime * VARS.ARM_DEGREES_PER_MILLISECOND;
+                    //cassette.setPosition(cassette.getPosition() + (VARS.cassetteMoveIncrement));
                     armMotor.setPower(-1);
+
+                    //cassette.setPosition(cassette.getPosition()-.05);
                 }else if (gamepad2.y) {
                     // UP
                     // adjust servo
 
-                    if (VARS.t0 == 0){
-                        VARS.t0 = System.currentTimeMillis();
-                    }else{
-                        VARS.t1 = System.currentTimeMillis();
-                        VARS.elapsedTime = VARS.t1 - VARS.t0;
-                        VARS.t0 = VARS.t1;
-                    }
-                    double CHANGE_IN_ARM_ANGLE = VARS.elapsedTime * VARS.ARM_DEGREES_PER_MILLISECOND;
-                    cassette.setPosition(cassette.getPosition() - (CHANGE_IN_ARM_ANGLE * VARS.CST_UNIT_PER_DEG));
+//                    if (VARS.t0 == 0){
+//                        VARS.t0 = System.currentTimeMillis();
+//                    }else{
+//                        VARS.t1 = System.currentTimeMillis();
+//                        VARS.elapsedTime = VARS.t1 - VARS.t0;
+//                        VARS.t0 = VARS.t1;
+//                    }
+//                    double CHANGE_IN_ARM_ANGLE = VARS.elapsedTime * VARS.ARM_DEGREES_PER_MILLISECOND;
+                    //cassette.setPosition(cassette.getPosition() - VARS.cassetteMoveIncrement);
+                    //cassette.setPosition(cassette.getPosition()+.05);
                     armMotor.setPower(1);
                 }else{
+                    VARS.t0 = 0;
                     armMotor.setPower(0);
                 }
 
                 if (gamepad2.x){
                     // switch to flat position
+                    cassette.setPosition(0);
                 }else if (gamepad2.b){
                     // switch to parallel to backdrop position
+                    cassette.setPosition(1);
+                }
+                if(gamepad2.left_bumper){
+                    cassette.setPosition(0);
+                }
+                if (gamepad2.right_bumper) {
+                    cassette.setPosition(1);
                 }
 
             }
 
             {
+
                 if (gamepad1.dpad_left) {
                     VARS.dpPressed = true;
                     VARS.dPadX = -VARS.dpSpeed;
@@ -171,19 +203,18 @@ public class FTCLibFC extends LinearOpMode {
                     VARS.dpPressed = true;
                     VARS.dPadX = VARS.dpSpeed;
 
-                } else {
+                }else if (!gamepad1.dpad_left || !gamepad1.dpad_right){
                     VARS.dpPressed = false;
                     VARS.dPadX = 0;
                 }
-
-                if (gamepad1.dpad_down) {
+                else if (gamepad1.dpad_down) {
                     VARS.dpPressed = true;
                     VARS.dPadY = -VARS.dpSpeed;
                 } else if (gamepad1.dpad_up) {
                     VARS.dpPressed = true;
                     VARS.dPadY = VARS.dpSpeed;
 
-                } else {
+                } else if (!gamepad1.dpad_down || !gamepad1.dpad_up) {
                     VARS.dpPressed = false;
                     VARS.dPadY = 0;
                 }
