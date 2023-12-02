@@ -26,21 +26,20 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-public class SimpleAprilTags extends LinearOpMode {
+public abstract class SimpleAprilTags extends LinearOpMode {
 private AprilTagProcessor aprilTagProcessor;
 private VisionPortal visionPortal;
 private static final boolean USE_WEBCAM = true;
-    private static final int DESIRED_TAG_ID = 0;
+
     private AprilTagProcessor aprilTag;
     private org.firstinspires.ftc.vision.apriltag.AprilTagDetection desiredTag = null;
 
     @TeleOp(name = "April Tag Test", group = "current")
 public class AprilTagDetection extends LinearOpMode {
-    OpenCvWebcam webcam = null;
+        OpenCvWebcam webcam = null;
 
         //units are pixels
         //edit calibration for our camera
-
 
         private DcMotor leftFrontDrive = null;
         private DcMotor rightFrontDrive = null;
@@ -48,27 +47,31 @@ public class AprilTagDetection extends LinearOpMode {
         private DcMotor rightBackDrive = null;
 
         final double distance_to_target = 12.0;
-        final double gain_speed  =  0.02  ;
-        final double gain_strafe =  0.015 ;
-        final double gain_turn =  0.01  ;
+        final double gain_speed = 0.02;
+        final double gain_strafe = 0.015;
+        final double gain_turn = 0.01;
 
         final double max_speed = 0.5;
         final double max_strafe = 0.5;
         final double max_turn = 0.3;
 
-        private static final boolean webcam_on = true;
-        private static final int DESIRED_TAG_ID = 0;     // Choose the tag you want to approach or set to -1 for ANY tag.
+        private static final int DESIRED_TAG_ID = -1;     // Choose the tag you want to approach or set to -1 for ANY tag.
         private AprilTagProcessor aprilTag;
-        private org.firstinspires.ftc.vision.apriltag.AprilTagDetection desiredTag = null;
+        public org.firstinspires.ftc.vision.apriltag.AprilTagDetection desiredTag = null;
 
 
-        @Override public void runOpMode() {
+
+
+        @Override
+        public void runOpMode() {
+
+            initAprilTag(); //(initialize)
+
             boolean targetFound = false;
             double drive = 0;
             double strafe = 0;
             double turn = 0;
 
-            //init??
 
             leftFrontDrive = hardwareMap.get(DcMotor.class, "leftfront_drive");
             rightFrontDrive = hardwareMap.get(DcMotor.class, "rightfront_drive");
@@ -82,7 +85,7 @@ public class AprilTagDetection extends LinearOpMode {
 
             int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
             webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam_1"), cameraMonitorViewId);
-            int tagsize;
+
             AprilTagProcessor.Builder myAprilTagProcessorBuilder = null;
             AprilTagProcessor myAprilTagProcessor = null;
             //Create a new AprilTagProcessor Builder = new AprilTagProcessor.Builder();
@@ -93,7 +96,6 @@ public class AprilTagDetection extends LinearOpMode {
 
             AprilTagDetection myAprilTagDetection = null;
 
-            int myAprilTagIdCode = myAprilTagDetection.id;
 
             VisionPortal myVisionPortal = null;
 
@@ -122,47 +124,49 @@ public class AprilTagDetection extends LinearOpMode {
                         //if found target, then drive to it automatically
                     }
 
-            }
+                }
 
                 if (targetFound) {
-                    telemetry.addData(">","Left-Bumper to Drive to Target");
+                    telemetry.addData(">", "Left-Bumper to Drive to Target");
                     telemetry.addData("Target", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
-                    telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
-                    telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
-                    telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
+                    telemetry.addData("Range", "%5.1f inches", desiredTag.ftcPose.range);
+                    telemetry.addData("Bearing", "%3.0f degrees", desiredTag.ftcPose.bearing);
+                    telemetry.addData("Yaw", "%3.0f degrees", desiredTag.ftcPose.yaw);
                 } else {
-                    telemetry.addData(">","Drive using joystick");
+                    telemetry.addData(">", "Drive using joystick");
                 }
 
                 if (gamepad1.left_bumper && targetFound) {
                     //drive to the target by itself
 
-                    double  FixRoll = (desiredTag.ftcPose.range - distance_to_target);
-                    double  FixPitch = desiredTag.ftcPose.bearing;
-                    double  FixYaw = desiredTag.ftcPose.yaw;
+                    double FixRoll = (desiredTag.ftcPose.range - distance_to_target);
+                    double FixPitch = desiredTag.ftcPose.bearing;
+                    double FixYaw = desiredTag.ftcPose.yaw;
 
 
-                    drive  = Range.clip(FixRoll * gain_speed, -max_speed, max_speed);
-                    turn   = Range.clip(FixPitch * gain_turn, -max_turn, max_turn) ;
+                    drive = Range.clip(FixRoll * gain_speed, -max_speed, max_speed);
+                    turn = Range.clip(FixPitch * gain_turn, -max_turn, max_turn);
                     strafe = Range.clip(-FixYaw * gain_strafe, -gain_strafe, gain_strafe);
 
-                    telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+                    telemetry.addData("Auto", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
 
                 } else {
 
                     // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
-                    drive  = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
-                    strafe = -gamepad1.left_stick_x  / 2.0;  // Reduce strafe rate to 50%.
-                    turn   = -gamepad1.right_stick_x / 3.0;  // Reduce turn rate to 33%.
-                    telemetry.addData("Manual","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+                    drive = -gamepad1.left_stick_y / 2.0;  // Reduce drive rate to 50%.
+                    strafe = -gamepad1.left_stick_x / 2.0;  // Reduce strafe rate to 50%.
+                    turn = -gamepad1.right_stick_x / 3.0;  // Reduce turn rate to 33%.
+                    telemetry.addData("Manual", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
                 }
                 telemetry.update();
 
                 // Apply desired axes motions to the drivetrain.
                 moveRobot(drive, strafe, turn);
                 sleep(10);
-                }
-                }
+            }
+        }
+
+
 
         public void moveRobot(double x, double y, double yaw) {
             // Calculate wheel powers.
@@ -188,7 +192,6 @@ public class AprilTagDetection extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
         }
-
         private void initAprilTag() {
 
             aprilTag = new AprilTagProcessor.Builder().build();
@@ -208,7 +211,7 @@ public class AprilTagDetection extends LinearOpMode {
         }
 
 
-        private void    setManualExposure(int exposureMS, int gain) {
+        private void setManualExposure(int exposureMS, int gain) {
             // Wait for the camera to be open, then use the controls
 
             if (visionPortal == null) {
