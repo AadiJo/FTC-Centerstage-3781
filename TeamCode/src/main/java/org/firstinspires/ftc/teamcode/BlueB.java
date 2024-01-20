@@ -192,33 +192,34 @@ public class BlueB extends LinearOpMode {
         }
     }
     private void setArmPos(int position, DcMotorEx armMotor, Servo cassette){
-        armMotor.setTargetPosition(position);
-        armMotor.setPower(-1);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double tolerance = 200;
         int par0Pos = par0.getPositionAndVelocity().position;
         int par1Pos = par1.getPositionAndVelocity().position;
         int perpPos = perp.getPositionAndVelocity().position;
-        powerCassette(cassette);
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
-        int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 2.5 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
-            if (position > currentArmPos){
-                moveCassetteUp(cassette);
+        while ((Math.abs(position - armMotor.getCurrentPosition()) > tolerance) && time1.time() < 2.5) {
 
+            // obtain the encoder position
+            double encoderPosition = armMotor.getCurrentPosition();
+            // calculate the error
+            double error = position - encoderPosition;
+            // set motor power proportional to the error
+            armMotor.setPower(error);
+            if (position > encoderPosition){
+                moveCassetteUp(cassette);
             }else{
                 moveCassetteDown(cassette);
-
             }
-            telemetry.addData("Cassette Pos", cassette.getPosition());
-            telemetry.addLine("Waiting for arm to reach position");
-            telemetry.addData("Target Pos", position);
-            telemetry.addData("Arm Ticks", armMotor.getCurrentPosition());
-            telemetry.update();
+
+            if (((Math.abs(par0Pos - par0.getPositionAndVelocity().position) > 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) > 50))){
+                break;
+            }
+
         }
+
         armMotor.setPower(0);
-        // stopping cassette
-        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
     private void moveBot(double inches){
         double inPerTick = MecanumDrive.PARAMS.inPerTick;
@@ -593,7 +594,7 @@ public class BlueB extends LinearOpMode {
                     drive.actionBuilder(drive.pose)
                             // Right in front of backdrop
                             //.strafeToConstantHeading(new Vector2d(-36.36, 39.6))
-                            .strafeToLinearHeading(new Vector2d(37, 45), Math.toRadians(0))//  was -36.36, 39.6, +4
+                            .strafeToLinearHeading(new Vector2d(37, 35), Math.toRadians(0))//  was -36.36, 39.6, +4
                             //.turn(Math.toRadians(180))
                             .build()
             );
@@ -702,35 +703,6 @@ public class BlueB extends LinearOpMode {
 
         drive.updatePoseEstimate();
 
-        if (propDirectionID == PropDirection.LEFT){
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 4.75))
-//                            .lineToX(drive.pose.position.x - 5)
-                            .build()
-            );
-        }
-
-        if (propDirectionID == PropDirection.RIGHT){
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y - 12.7))
-//                            .lineToX(drive.pose.position.x + 5)
-                            .build()
-            );
-        }
-
-        if (propDirectionID == PropDirection.MIDDLE){
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y - 6))
-//                            .lineToX(drive.pose.position.x + 5)
-                            .build()
-            );
-        }
-
-        drive.updatePoseEstimate();
-
 
 //        if (propDirectionID == PropDirection.MIDDLE){
 //            Actions.runBlocking(
@@ -758,14 +730,14 @@ public class BlueB extends LinearOpMode {
     private void dropPxlTwo(){
         // TODO outtake
         //outtake();
-
-        setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+        int startArmPos = armMotor.getCurrentPosition();
+        setArmPos((int) armMotor.getCurrentPosition() - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
 
         sleep(50);
 
 
         door.setPosition(0.3);
-        sleep(200);
+        sleep(2000);
         setArmPos((int) ARM_START_POS + 10 , armMotor, cassette);
         sleep(50);
         door.setPosition(0.65);
@@ -830,6 +802,9 @@ public class BlueB extends LinearOpMode {
         telemetry.addLine("left " + pipeline.leftavgfinal);
         telemetry.addLine("right " + pipeline.rightavgfinal);
         telemetry.addLine("middle" + pipeline.midavgfinal);
+
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
         ARM_START_POS = armMotor.getCurrentPosition();

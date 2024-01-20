@@ -360,7 +360,7 @@ public class RedA extends LinearOpMode {
         }
     }
 
-    void moveCassetteDown(Servo cassette){
+    void moveCassetteDown(){
         if (!Double.isNaN(cassette.getPosition())){
             if (cassette.getPosition() - 0.05 > CST_UPPER_BOUND){
                 cassette.setPosition(cassette.getPosition() - 0.05);
@@ -376,7 +376,7 @@ public class RedA extends LinearOpMode {
 
     }
 
-    void moveCassetteUp(Servo cassette){
+    void moveCassetteUp(){
         if (!Double.isNaN(cassette.getPosition())){
             if (cassette.getPosition() + 0.05 < CST_LOWER_BOUND){
                 cassette.setPosition(cassette.getPosition() + 0.05);
@@ -392,35 +392,30 @@ public class RedA extends LinearOpMode {
         }
     }
 
-    private void setArmPos(int position, DcMotorEx armMotor, Servo cassette){
-        armMotor.setTargetPosition(position);
-        armMotor.setPower(1);
-        powerCassette(cassette);
+    private void setArmPos(int position){
+        sleep(50);
+        double tolerance = 30;
         int par0Pos = par0.getPositionAndVelocity().position;
         int par1Pos = par1.getPositionAndVelocity().position;
         int perpPos = perp.getPositionAndVelocity().position;
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 2.5 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
-            if (position > currentArmPos){
-                moveCassetteUp(cassette);
+        while (armMotor.getCurrentPosition() != position && Math.abs(position - armMotor.getCurrentPosition()) > tolerance && ((Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)) &&  time1.time() < 2.5) {
 
+            // obtain the encoder position
+            double encoderPosition = armMotor.getCurrentPosition();
+            // calculate the error
+            double error = position - encoderPosition;
+            // set motor power proportional to the error
+            armMotor.setPower(error);
+            if (position > encoderPosition){
+                moveCassetteUp();
             }else{
-                moveCassetteDown(cassette);
-
+                moveCassetteDown();
             }
-            telemetry.addData("Cassette Pos", cassette.getPosition());
-            telemetry.addLine("Waiting for arm to reach position");
-            telemetry.addData("Target Pos", position);
-            telemetry.addData("Arm Ticks", armMotor.getCurrentPosition());
-            telemetry.update();
+
         }
-        armMotor.setPower(0);
-        sleep(100);
-        // stopping cassette
-        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sleep(50);
     }
 
     private void initialize(){
@@ -796,11 +791,11 @@ public class RedA extends LinearOpMode {
     }
     private void dropPxlTwo(){
         //outtake();
-        setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 160, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+        setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 160); // was ARM_BD_L3_POS but want to change to 2 or 1
         sleep(200);
         door.setPosition(0.3);
         sleep(300);
-        setArmPos((int) ARM_START_POS, armMotor, cassette);
+        setArmPos((int) ARM_START_POS);
         door.setPosition(0.65);
 
 

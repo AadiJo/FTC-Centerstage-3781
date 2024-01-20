@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -27,6 +28,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.opencv.core.Mat;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -343,7 +345,7 @@ public class BlueA extends LinearOpMode {
         claw.setPosition(0.8); // 1
     }
     private void drop(){
-        claw.setPosition(0); // 0.2 // 0
+        claw.setPosition(-0.3); // 0.2 // 0
     }
     private void outtakeWhitePxl(){
         // TODO white pxl outtake
@@ -395,33 +397,34 @@ public class BlueA extends LinearOpMode {
     }
 
     private void setArmPos(int position, DcMotorEx armMotor, Servo cassette){
-        armMotor.setTargetPosition(position);
-        armMotor.setPower(1);
-        powerCassette(cassette);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double tolerance = 200;
         int par0Pos = par0.getPositionAndVelocity().position;
         int par1Pos = par1.getPositionAndVelocity().position;
         int perpPos = perp.getPositionAndVelocity().position;
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 2.5 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
-            if (position > currentArmPos){
-                moveCassetteUp(cassette);
+        while ((Math.abs(position - armMotor.getCurrentPosition()) > tolerance) && time1.time() < 2.5) {
 
+            // obtain the encoder position
+            double encoderPosition = armMotor.getCurrentPosition();
+            // calculate the error
+            double error = position - encoderPosition;
+            // set motor power proportional to the error
+            armMotor.setPower(error);
+            if (position > encoderPosition){
+                moveCassetteUp(cassette);
             }else{
                 moveCassetteDown(cassette);
-
             }
-            telemetry.addData("Cassette Pos", cassette.getPosition());
-            telemetry.addLine("Waiting for arm to reach position");
-            telemetry.addData("Target Pos", position);
-            telemetry.addData("Arm Ticks", armMotor.getCurrentPosition());
-            telemetry.update();
+
+            if (((Math.abs(par0Pos - par0.getPositionAndVelocity().position) > 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) > 50))){
+                break;
+            }
+
         }
+
         armMotor.setPower(0);
-        // stopping cassette
-        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     private void initialize(){
@@ -586,7 +589,7 @@ public class BlueA extends LinearOpMode {
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
 //                                .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 2))
-                                .lineToX(-50, new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 30))
+                                .lineToX(-51, new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 30))
                                 //.strafeTo(new Vector2d(drive.pose.position.x, -56))
                                 .build()
                 );
@@ -660,10 +663,11 @@ public class BlueA extends LinearOpMode {
                     drive.actionBuilder(drive.pose)
 //                            .strafeTo(new Vector2d(36, drive.pose.position.y), new TranslationalVelConstraint(90) , new ProfileAccelConstraint(-30, 50))
 //                            .strafeTo(new Vector2d(39, 34), new TranslationalVelConstraint(40))
-                            .splineTo(new Vector2d(-24.28, 12.51), Math.toRadians(1.89))
-                            .splineTo(new Vector2d(16.90, 13.50), Math.toRadians(5.19))
-                            .splineTo(new Vector2d(31.10, 17.89), Math.toRadians(41.78))
-                            .splineTo(new Vector2d(40.73, 45.51), Math.toRadians(0.00))
+                            .splineTo(new Vector2d(-24.28, 12.51), Math.toRadians(0))
+                            .splineTo(new Vector2d(16.90, 13.50), Math.toRadians(0))
+                            //.splineTo(new Vector2d(31.10, 17.89), Math.toRadians(0))
+                            .strafeTo(new Vector2d(50.73, 13.50), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 50))
+                            .strafeTo(new Vector2d(44.73, 45.51), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 50))
                             .build()
             );
 
@@ -679,6 +683,7 @@ public class BlueA extends LinearOpMode {
         double  drive_          = 0;        // Desired forward power/speed (-1 to +1)
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
         double  turn            = 0;
+        boolean hasMoved = false;
         int DESIRED_TAG_ID      = 2;
         if (propDirectionID == PropDirection.LEFT){
             DESIRED_TAG_ID      = 1;
@@ -693,13 +698,13 @@ public class BlueA extends LinearOpMode {
         //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
         //  applied to the drive motors to correct the error.
         //  Drive = Error * Gain    Make these values smaller for smoother control, or larger for a more aggressive response.
-        final double SPEED_GAIN  =    0.05;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
-        final double STRAFE_GAIN =  0.015;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
-        final double TURN_GAIN   =   0.015;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
+        double SPEED_GAIN  =    0.05;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
+        double STRAFE_GAIN =  0.015;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
+        double TURN_GAIN   =   0.015;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
         final double MAX_AUTO_SPEED = 0.6;   //  Clip the approach speed to this max value (adjust for your robot)
         final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_TURN  = 0.2;   //  Clip the turn speed to this max value (adjust for your robot)
+        final double MAX_AUTO_TURN  = 0.4;   //  Clip the turn speed to this max value (adjust for your robot)
 
         // Initialize the April tag Detection process
         initAprilTag();
@@ -738,6 +743,7 @@ public class BlueA extends LinearOpMode {
             // Tell the driver what we see, and what to do.
             if (targetFound) {
                 //telemetry.addData("\n>","HOLD Left-Bumper to Drive to Target\n");
+                hasMoved = true;
                 telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
                 telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
                 telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
@@ -757,47 +763,52 @@ public class BlueA extends LinearOpMode {
                     break;
                 }
             } else {
-                telemetry.addData("\n>","Waiting for target...\n");
+                if (!hasMoved){
+                    if (!currentDetections.isEmpty()){
+                        if (currentDetections.get(0).id < DESIRED_TAG_ID){
+                            Actions.runBlocking(
+                                    drive.actionBuilder(drive.pose)
+                                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y - 5))
+                                            .build()
+                            );
+                        }
+                        if (currentDetections.get(0).id > DESIRED_TAG_ID){
+                            Actions.runBlocking(
+                                    drive.actionBuilder(drive.pose)
+                                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 5))
+                                            .build()
+                            );
+                        }
+                    }
+                }
+
             }
             telemetry.update();
             sleep(10);
         }
+        drive_ = 0;
+        turn   = 0;
+        strafe = 0;
+        SPEED_GAIN = 0;
+        STRAFE_GAIN = 0;
+        TURN_GAIN = 0;
 
-        drive.updatePoseEstimate();
 
-//        if (propDirectionID == PropDirection.LEFT){
-//            Actions.runBlocking(
-//                    drive.actionBuilder(drive.pose)
-//                            .strafeTo(new Vector2d(drive.pose.position.x - 6, drive.pose.position.y))
-////                            .lineToX(drive.pose.position.x - 5)
-//                            .build()
-//            );
-//        }
-//
-//        if (propDirectionID == PropDirection.RIGHT){
-//            Actions.runBlocking(
-//                    drive.actionBuilder(drive.pose)
-//                            .strafeTo(new Vector2d(drive.pose.position.x + 11, drive.pose.position.y))
-////                            .lineToX(drive.pose.position.x + 5)
-//                            .build()
-//            );
-//        }
-//
-//        if (propDirectionID == PropDirection.MIDDLE){
-//            Actions.runBlocking(
-//                    drive.actionBuilder(drive.pose)
-//                            .strafeTo(new Vector2d(drive.pose.position.x + 6, drive.pose.position.y))
-////                            .lineToX(drive.pose.position.x + 5)
-//                            .build()
-//            );
-//        }
+        drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
+
+        sleep(1000);
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+
 
         drive.updatePoseEstimate();
 
     }
     private void dropPxlTwo(){
         //outtake();
-        setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 160, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+        setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
         sleep(200);
         door.setPosition(0.3);
         sleep(300);
@@ -806,67 +817,20 @@ public class BlueA extends LinearOpMode {
 
 
     }
-    private void goToBackdropInLoop(){
 
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-//
-                        // Add extra spline step and reversed for loop; constant heading so it faces same direction
-//                        .splineToConstantHeading(new Vector2d(-10.57, -53.96), Math.toRadians(268.59))
-//                        .splineToConstantHeading(new Vector2d(-9.53, -3.87), Math.toRadians(-86.93))
-//                        .splineToConstantHeading(new Vector2d(-22.32, 38.50), Math.toRadians(-17.72))
-//                        .splineTo(new Vector2d(-3.03, -5.43), Math.toRadians(93.81))
-//                        .splineTo(new Vector2d(-26.16, 36.60), Math.toRadians(130.60))
-//                        .splineTo(new Vector2d(-33.92, 49.00), Math.toRadians(90.00))
-                        .splineTo(new Vector2d(-15.87, 58.31), Math.toRadians(115.20))
-                        .build()
-
-        );
-    }
-    private void dropWhitePxl(){
-        goToBackdropInLoop();
-        outtakeWhitePxl();
-    }
-
-    private void setupForPark(){
-//        Actions.runBlocking(
-//                drive.actionBuilder(drive.pose)
-//                        .splineTo(new Vector2d(-19.95, 50.87), Math.toRadians(127.87))
-//                        .build()
-//
-//        );
-
-        if (propDirectionID == PropDirection.LEFT || propDirectionID == PropDirection.RIGHT){
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            .strafeToConstantHeading(new Vector2d(startXPos + 78, startYPos))
-                            .build()
-
-            );
-        }else if(propDirectionID == PropDirection.MIDDLE){
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            .strafeToConstantHeading(new Vector2d(startXPos + 35, startYPos))
-                            .strafeToConstantHeading(new Vector2d(startXPos + 40, startYPos - 20))
-                            .strafeToConstantHeading(new Vector2d(startXPos + 90, startYPos - 20))
-                            .strafeToConstantHeading(new Vector2d(startXPos + 100, startYPos))
-                            .build()
-
-            );
-        }
-
-
-    }
     private void park(){
         drive.updatePoseEstimate();
         Actions.runBlocking(
                 drive.actionBuilder(drive.pose)
-                        .strafeTo(new Vector2d(drive.pose.position.x, 15.5))
-                        .strafeToLinearHeading(new Vector2d(60, 7.8), Math.toRadians(270))
+                        .strafeTo(new Vector2d(drive.pose.position.x, 15))
+                        .strafeToLinearHeading(new Vector2d(60, 13), Math.toRadians(270))
+                        .strafeTo(new Vector2d(60, 11))
                         //.strafeToConstantHeading(new Vector2d(startXPos + 100, startYPos + 100))
                         .build()
 
         );
+
+        moveBot(-5);
 
 
     }
@@ -891,14 +855,15 @@ public class BlueA extends LinearOpMode {
         telemetry.addData("Turn Error", Math.abs(Math.toRadians(90) - l_turn));
         telemetry.update();
 
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         ARM_START_POS = armMotor.getCurrentPosition();
 
         waitForStart();
         time.reset();
         imu.resetYaw();
         drive.updatePoseEstimate();
-        // TODO set cassette to backdrop angle
-
         // Purple Pixel (first pixel) on floor to be pushed
         // Yellow Pixel (second pixel) in cassette
         cassette.setPosition(1);

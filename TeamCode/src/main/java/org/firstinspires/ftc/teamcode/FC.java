@@ -358,7 +358,26 @@ public class FC extends LinearOpMode {
                 powerCassette(cassette);
             }
 
-            if (gamepad2.b || VARS.CST_UP){
+            if (gamepad2.b){
+                // switch to flat position
+
+                if (!Double.isNaN(cassette.getPosition())){
+                    if (cassette.getPosition() + 0.05 < VARS.CST_LOWER_BOUND){
+                        cassette.setPosition(cassette.getPosition() + 0.05);
+                        sleep(30);
+                    }else{
+                        cassette.setPosition(VARS.CST_LOWER_BOUND);
+                        sleep(30);
+                    }
+
+                }else{
+                    cassette.setPosition(0.8);
+                    sleep(30);
+                }
+
+
+            }
+            if (VARS.CST_UP){
                 // switch to flat position
 
                 if (!Double.isNaN(cassette.getPosition())){
@@ -387,11 +406,48 @@ public class FC extends LinearOpMode {
                 sleep(300);
                 door.setPosition(0.65);
             }
-            if (gamepad2.x || VARS.CST_DOWN){
+            if (gamepad2.x){
                 // switch to parallel to backdrop position
                 if (!Double.isNaN(cassette.getPosition())){
                     if (cassette.getPosition() - 0.05 > VARS.CST_UPPER_BOUND){
-                        cassette.setPosition(cassette.getPosition() - 0.05);
+                        if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
+                            if (cassette.getPosition() > 0.35){
+                                cassette.setPosition(cassette.getPosition() - 0.05);
+                            }else{
+                                cassette.setPosition(0.3);
+                            }
+
+                        }else{
+                            cassette.setPosition(cassette.getPosition() - 0.05);
+                        }
+
+                        sleep(30);
+                    }else{
+                        cassette.setPosition(VARS.CST_UPPER_BOUND);
+                        sleep(30);
+                    }
+                }else{
+                    cassette.setPosition(0.8);
+                    sleep(30);
+                }
+
+                }
+
+            if (VARS.CST_DOWN){
+                // switch to parallel to backdrop position
+                if (!Double.isNaN(cassette.getPosition())){
+                    if (cassette.getPosition() - 0.05 > VARS.CST_UPPER_BOUND){
+                        if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
+                            if (cassette.getPosition() > 0.35){
+                                cassette.setPosition(cassette.getPosition() - 0.05);
+                            }else{
+                                cassette.setPosition(0.3);
+                            }
+
+                        }else{
+                            cassette.setPosition(cassette.getPosition() - 0.05);
+                        }
+
                         sleep(100);
                     }else{
                         cassette.setPosition(VARS.CST_UPPER_BOUND);
@@ -402,7 +458,6 @@ public class FC extends LinearOpMode {
                     sleep(100);
                 }
 
-                }
             }
             powerCassette(cassette);
 
@@ -412,5 +467,7 @@ public class FC extends LinearOpMode {
                 door.setPosition(1);
             }
 
+        }
             }
+
 }
