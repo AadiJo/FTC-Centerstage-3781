@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
-import com.acmerobotics.roadrunner.ftc.RawEncoder;
+import com.acmerobotics.roadrunner.ftc.Encoder;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -13,18 +12,27 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name = "TeleOP", group = "Current")
 public class FC extends LinearOpMode {
 
-    // TODO CLAMP VALUES AS NEEDED
-
     public static class VARS{
-        public  double ticksPerRevDrone = 103.8;
-        public  double maxTicksPerSec = 1620 /60 * ticksPerRevDrone;
+        public double ticksPerRevDrone = 103.8;
+        public double maxTicksPerSec = 1620 /60 * ticksPerRevDrone;
         public double droneRPM = .75 * 1620;
+
+        double Kp = PIDConstants.Kp;
+        double Ki = PIDConstants.Ki;
+        double Kd = PIDConstants.Kd;
+
+        double lastError = 0;
+        double integralSum;
+//        public double lastError = 0.009;
+
+        ElapsedTime PIDTimer = new ElapsedTime();
 
         public boolean isOpen = true;
         public double dPadX;
@@ -76,7 +84,7 @@ public class FC extends LinearOpMode {
         if (!Double.isNaN(cassette.getPosition())){
             cassette.setPosition(cassette.getPosition());
         }else{
-            cassette.setPosition(0);
+            cassette.setPosition(1);
         }
     }
 
@@ -136,16 +144,40 @@ public class FC extends LinearOpMode {
         // stopping cassette
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+    public double angleWrap(double radians){
+        while(radians > Math.PI){
+            radians -= 2 * Math.PI;
+        }
+        while(radians < -Math.PI){
+            radians += 2 * Math.PI;
+        }
+        return radians;
+    }
+    public double PIDControl(double reference, double state) {
+        VARS.integralSum = 0;
+        double error = angleWrap(reference - state);
+        telemetry.addData("Error: ", error);
+        VARS.integralSum += error * VARS.PIDTimer.seconds();
+        double derivative = (error - VARS.lastError) / (VARS.PIDTimer.seconds());
+        VARS.lastError = error;
+        VARS.PIDTimer.reset();
+        return (error * VARS.Kp) + (derivative * VARS.Kd) + (VARS.integralSum * VARS.Ki);
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
+        double targetHeading = Math.toRadians(0);
+        double tolerance = 0.01;
         Motor leftFront = new Motor(hardwareMap, "frntLF");
         Motor leftBack = new Motor(hardwareMap, "bckLF");
         Motor rightBack = new Motor(hardwareMap, "bckRT");
         Motor rightFront = new Motor(hardwareMap, "frntRT");
-        OverflowEncoder leftEncoder = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftEncoder")));
-        OverflowEncoder rightEncoder = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntLF")));
-        OverflowEncoder frontEncoder = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT")));
+        Encoder leftEncoder = new ThreeDeadWheelLocalizer(hardwareMap, org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick).par0;
+        //par0 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftEncoder"))); // leftEncoder
+        Encoder rightEncoder = new ThreeDeadWheelLocalizer(hardwareMap, org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick).par1;
+        // par1 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntLF"))); // frntLF
+        Encoder frontEncoder = new ThreeDeadWheelLocalizer(hardwareMap, org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick).perp;
+        //perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT")));OverflowEncoder frontEncoder = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT")));
 
         Servo claw = hardwareMap.servo.get("claw");
         Servo cassette = hardwareMap.servo.get("cassette");
@@ -164,7 +196,7 @@ public class FC extends LinearOpMode {
             rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
             rightFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
             droneMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //            armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             // armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -183,6 +215,8 @@ public class FC extends LinearOpMode {
                 leftFront, rightFront, leftBack, rightBack
         );
 
+        double loopTime = 0.0;
+
         // initialize the IMU
 
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -197,27 +231,49 @@ public class FC extends LinearOpMode {
         GamepadEx driverOp = new GamepadEx(gamepad1);
 
         VARS.ARM_START_POS = armMotor.getCurrentPosition();
+        drive.driveFieldCentric(
+                driverOp.getLeftX(),
+                driverOp.getLeftY(),
+                -PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS)),
+                imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
+                false
+        );
 
         waitForStart();
 
         while (!isStopRequested()) {
+            double loop = System.nanoTime();
 
-            drive.driveFieldCentric(
-                    driverOp.getLeftX(),
-                    driverOp.getLeftY(),
-                    driverOp.getRightX() * 0.5,
-                    imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
-                    false
-            );
+            if (driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance)){
+                PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+                drive.driveFieldCentric(
+                        driverOp.getLeftX(),
+                        driverOp.getLeftY(),
+                        driverOp.getRightX() * 0.5,
+                        imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
+                        false
+                );
+                targetHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            }else{ // if no input from right joystick
+                drive.driveFieldCentric(
+                        driverOp.getLeftX(),
+                        driverOp.getLeftY(),
+                        -PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS)),
+                        imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
+                        false
+                );
+            }
 
             log("Heading", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             log("Cassette", cassette.getPosition());
             log("Arm Ticks", armMotor.getCurrentPosition());
             log("Cassette Pos", cassette.getPosition());
-            log("Par 0", leftEncoder.encoder.getPositionAndVelocity().position);
-            log("Par 1", rightEncoder.encoder.getPositionAndVelocity().position);
-            log("Perp", frontEncoder.encoder.getPositionAndVelocity().position);
-            telemetry.addLine("Test 123");
+            log("Par 0", leftEncoder.getPositionAndVelocity().position);
+            log("Par 1", rightEncoder.getPositionAndVelocity().position);
+            log("Perp", frontEncoder.getPositionAndVelocity().position);
+//            telemetry.addData("hz", 1000000000  / (loop - loopTime));
+            loopTime = loop;
+            telemetry.addData("Last Error", VARS.lastError);
             telemetry.update();
 
             {
@@ -225,6 +281,7 @@ public class FC extends LinearOpMode {
                 if (gamepad1.back || imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) == 0.0) {
                     imu.initialize(parameters);
                     imu.resetYaw();
+                    targetHeading = Math.toRadians(0);
                     gamepad1.rumble(1, 1, 200);
                 }
 
@@ -323,9 +380,12 @@ public class FC extends LinearOpMode {
             if (gamepad2.y) {
                 // UP
                 // opposite to arm
-                VARS.CST_DOWN = true;
-                armMotor.setPower(-1);
-                powerCassette(cassette);
+                if (armMotor.getCurrentPosition() > (VARS.ARM_START_POS - 6166)){
+                    VARS.CST_DOWN = true;
+                    armMotor.setPower(-1);
+                    powerCassette(cassette);
+                }
+
             }else if (!gamepad2.a){
                 VARS.t0 = 0;
                 VARS.CST_DOWN = false;
@@ -362,8 +422,8 @@ public class FC extends LinearOpMode {
                 // switch to flat position
 
                 if (!Double.isNaN(cassette.getPosition())){
-                    if (cassette.getPosition() + 0.05 < VARS.CST_LOWER_BOUND){
-                        cassette.setPosition(cassette.getPosition() + 0.05);
+                    if (cassette.getPosition() + 0.02 < VARS.CST_LOWER_BOUND){
+                        cassette.setPosition(cassette.getPosition() + 0.02);
                         sleep(30);
                     }else{
                         cassette.setPosition(VARS.CST_LOWER_BOUND);
@@ -371,7 +431,7 @@ public class FC extends LinearOpMode {
                     }
 
                 }else{
-                    cassette.setPosition(0.8);
+                    cassette.setPosition(0);
                     sleep(30);
                 }
 
@@ -390,7 +450,7 @@ public class FC extends LinearOpMode {
                     }
 
                 }else{
-                    cassette.setPosition(0.8);
+                    cassette.setPosition(0);
                     sleep(100);
                 }
 
@@ -409,16 +469,16 @@ public class FC extends LinearOpMode {
             if (gamepad2.x){
                 // switch to parallel to backdrop position
                 if (!Double.isNaN(cassette.getPosition())){
-                    if (cassette.getPosition() - 0.05 > VARS.CST_UPPER_BOUND){
+                    if (cassette.getPosition() - 0.02 > VARS.CST_UPPER_BOUND){
                         if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
                             if (cassette.getPosition() > 0.35){
-                                cassette.setPosition(cassette.getPosition() - 0.05);
+                                cassette.setPosition(cassette.getPosition() - 0.02);
                             }else{
                                 cassette.setPosition(0.3);
                             }
 
                         }else{
-                            cassette.setPosition(cassette.getPosition() - 0.05);
+                            cassette.setPosition(cassette.getPosition() - 0.02);
                         }
 
                         sleep(30);
@@ -427,7 +487,7 @@ public class FC extends LinearOpMode {
                         sleep(30);
                     }
                 }else{
-                    cassette.setPosition(0.8);
+                    cassette.setPosition(0);
                     sleep(30);
                 }
 
@@ -454,7 +514,7 @@ public class FC extends LinearOpMode {
                         sleep(100);
                     }
                 }else{
-                    cassette.setPosition(0.8);
+                    cassette.setPosition(0);
                     sleep(100);
                 }
 
