@@ -41,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 // B side is the side with the backdrop
 // One hand in from OUTSIDE SEAM on LEFT
 @Autonomous(name = "Blue Backdrop")
-// TODO CLAMP VALUES AS NEEDED
 public class BlueB extends LinearOpMode {
 
     OpenCvWebcam webcam = null;
@@ -68,10 +67,6 @@ public class BlueB extends LinearOpMode {
 
     public double ARM_START_POS;
 
-    public int ARM_BD_L1_POS = Math.abs(-5550 + 65); //-5477
-    public int ARM_BD_L2_POS = Math.abs(-4890 + 65);
-    public int ARM_BD_L3_POS = Math.abs(-4303 + 65);
-
     public int ARM_BD_X_POS = 6011;
 
     private VisionPortal visionPortal;               // Used to manage the video source.
@@ -80,8 +75,6 @@ public class BlueB extends LinearOpMode {
     public boolean CST_UP = false;
 
     DetectionPipeline pipeline;
-
-    //TrajectoryBuilder trajectoryBuilder;
 
     MecanumDrive drive;
 
@@ -162,7 +155,7 @@ public class BlueB extends LinearOpMode {
 
     void moveCassetteDown(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() - 0.05 > CST_UPPER_BOUND){
+            if (cassette.getPosition() - 0.055 > CST_UPPER_BOUND){
                 cassette.setPosition(cassette.getPosition() - 0.055);
                 sleep(100);
             }else{
@@ -178,7 +171,7 @@ public class BlueB extends LinearOpMode {
 
     void moveCassetteUp(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() + 0.05 < CST_LOWER_BOUND){
+            if (cassette.getPosition() + 0.055 < CST_LOWER_BOUND){
                 cassette.setPosition(cassette.getPosition() + 0.055);
                 sleep(100);
             }else{
@@ -192,14 +185,14 @@ public class BlueB extends LinearOpMode {
         }
     }
     private void setArmPos(int position, DcMotorEx armMotor, Servo cassette){
-        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        double tolerance = 200;
+        sleep(50);
+        double tolerance = 30;
         int par0Pos = par0.getPositionAndVelocity().position;
         int par1Pos = par1.getPositionAndVelocity().position;
         int perpPos = perp.getPositionAndVelocity().position;
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
-        while ((Math.abs(position - armMotor.getCurrentPosition()) > tolerance) && time1.time() < 2.5) {
+        while (armMotor.getCurrentPosition() != position && Math.abs(position - armMotor.getCurrentPosition()) > tolerance && ((Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)) &&  time1.time() < 2.5) {
 
             // obtain the encoder position
             double encoderPosition = armMotor.getCurrentPosition();
@@ -213,13 +206,8 @@ public class BlueB extends LinearOpMode {
                 moveCassetteDown(cassette);
             }
 
-            if (((Math.abs(par0Pos - par0.getPositionAndVelocity().position) > 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) > 50))){
-                break;
-            }
-
         }
-
-        armMotor.setPower(0);
+        sleep(50);
     }
     private void moveBot(double inches){
         double inPerTick = MecanumDrive.PARAMS.inPerTick;
@@ -408,9 +396,6 @@ public class BlueB extends LinearOpMode {
         claw.setPosition(0);
     }
 
-    private TimeTrajectory convertTraj(List<Trajectory> t){
-        return new TimeTrajectory(t.get(0));
-    }
 
     // PRGM STARTS HERE
 
@@ -551,7 +536,6 @@ public class BlueB extends LinearOpMode {
             }
 
         }else if (propDirectionID == PropDirection.MIDDLE){
-            // TODO
             telemetry.addData("DIRECTION", propDirectionID);
             telemetry.update();
             Actions.runBlocking(
@@ -631,13 +615,14 @@ public class BlueB extends LinearOpMode {
         //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
         //  applied to the drive motors to correct the error.
         //  Drive = Error * Gain    Make these values smaller for smoother control, or larger for a more aggressive response.
-        final double SPEED_GAIN  =    0.05;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
-        final double STRAFE_GAIN =  0.015;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
-        final double TURN_GAIN   =   0.015;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
+        double SPEED_GAIN  =    0.05;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
+        double STRAFE_GAIN =  0.015;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
+        double TURN_GAIN   =   0.015;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
-        final double MAX_AUTO_SPEED = 0.6;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_TURN  = 0.2;   //  Clip the turn speed to this max value (adjust for your robot)
+        final double MAX_AUTO_SPEED = 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
+        final double MAX_AUTO_STRAFE= 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
+        final double MAX_AUTO_TURN  = 0;
+        boolean hasMoved = false; //  Clip the turn speed to this max value (adjust for your robot)
 
         // Initialize the April tag Detection process
         initAprilTag();
@@ -650,8 +635,7 @@ public class BlueB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
 
-        // TODO change break condition
-        while (time1.time() < 2){
+        while (time1.time() < 1.6){
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("Detections", aprilTag.getDetections());
             for (AprilTagDetection detection : currentDetections) {
@@ -676,6 +660,7 @@ public class BlueB extends LinearOpMode {
             // Tell the driver what we see, and what to do.
             if (targetFound) {
                 //telemetry.addData("\n>","HOLD Left-Bumper to Drive to Target\n");
+                hasMoved = true;
                 telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
                 telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
                 telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
@@ -695,87 +680,59 @@ public class BlueB extends LinearOpMode {
                     break;
                 }
             } else {
-                telemetry.addData("\n>","Waiting for target...\n");
+                if (!hasMoved){
+                    time1.reset();
+                    if (!currentDetections.isEmpty()){
+                        if (currentDetections.get(0).id < DESIRED_TAG_ID){
+                            Actions.runBlocking(
+                                    drive.actionBuilder(drive.pose)
+                                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y - 5))
+                                            .build()
+                            );
+                        }
+                        if (currentDetections.get(0).id > DESIRED_TAG_ID){
+                            Actions.runBlocking(
+                                    drive.actionBuilder(drive.pose)
+                                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 5))
+                                            .build()
+                            );
+                        }
+                    }
+                }
+
             }
             telemetry.update();
             sleep(10);
         }
+        drive_ = 0;
+        turn   = 0;
+        strafe = 0;
+        SPEED_GAIN = 0;
+        STRAFE_GAIN = 0;
+        TURN_GAIN = 0;
+
+
+        //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
+
+        sleep(1000);
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+
 
         drive.updatePoseEstimate();
 
-
-//        if (propDirectionID == PropDirection.MIDDLE){
-//            Actions.runBlocking(
-//                    drive.actionBuilder(drive.pose)
-//                            // Right in front of backdrop
-//                            //.strafeToConstantHeading(new Vector2d(-36.36, 39.6))
-//                            .strafeTo(new Vector2d(drive.pose.position.x - 5, 42.1)) //  was -36.36, 39.6, +4
-//                            //.turn(Math.toRadians(180))
-//                            .build()
-//            );
-//        }
-//
-//        if (propDirectionID == PropDirection.LEFT){
-//            Actions.runBlocking(
-//                    drive.actionBuilder(drive.pose)
-//                            // Right in front of backdrop
-//                            //.strafeToConstantHeading(new Vector2d(-36.36, 39.6))
-//                            .strafeTo(new Vector2d(drive.pose.position.x - 10, 42.1)) //  was -36.36, 39.6, +4
-//                            //.turn(Math.toRadians(180))
-//                            .build()
-//            );
-//        }
-
     }
     private void dropPxlTwo(){
-        // TODO outtake
         //outtake();
-        int startArmPos = armMotor.getCurrentPosition();
-        setArmPos((int) armMotor.getCurrentPosition() - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+        setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+        sleep(200);
+        door.setPosition(0);
+        sleep(300);
+        setArmPos((int) ARM_START_POS, armMotor, cassette);
+        door.setPosition(0.6);
 
-        sleep(50);
-
-
-        door.setPosition(0.3);
-        sleep(2000);
-        setArmPos((int) ARM_START_POS + 10 , armMotor, cassette);
-        sleep(50);
-        door.setPosition(0.65);
-
-    }
-    private void setupForLoops(){
-
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-                        .splineTo(new Vector2d(-22.32, 38.50), Math.toRadians(-17.72))
-                        .splineTo(new Vector2d(-9.53, -3.87), Math.toRadians(-86.93))
-                        .splineTo(new Vector2d(-10.57, -67.96), Math.toRadians(268.59))
-                        // TODO Fine tune on field
-                        .build()
-        );
-
-    }
-    private void goToBackdropInLoop(){
-
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-//                        .splineToConstantHeading(new Vector2d(-11.49, 31.70), Math.toRadians(91.43))
-//                        .splineToConstantHeading(new Vector2d(-36.23, 51.49), Math.toRadians(90.00))
-                        .splineTo(new Vector2d(-3.03, -5.43), Math.toRadians(93.81))
-                        .splineTo(new Vector2d(-26.16, 36.60), Math.toRadians(130.60))
-                        .splineTo(new Vector2d(-33.92, 50.00), Math.toRadians(90.00))
-                        .build()
-
-        );
-    }
-
-    private void setupForPark(){
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-                        .splineTo(new Vector2d(-17.68, 41.90), Math.toRadians(79.56))
-                        .build()
-
-        );
     }
     private void park(){
         Actions.runBlocking(
@@ -823,7 +780,6 @@ public class BlueB extends LinearOpMode {
         imu.resetYaw();
         drive.updatePoseEstimate();
         pick();
-        // TODO set cassette to backdrop angle
 
         // Purple Pixel (first pixel) on floor to be pushed
         // Yellow Pixel (second pixel) in cassettex`

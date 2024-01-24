@@ -56,10 +56,6 @@ public class BlueA extends LinearOpMode {
 
     public double ARM_START_POS;
 
-    public int ARM_BD_L1_POS = Math.abs(-5550 + 65); //-5477
-    public int ARM_BD_L2_POS = Math.abs(-4890 + 65);
-    public int ARM_BD_L3_POS = Math.abs(-4303 + 65);
-
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;
 
@@ -113,56 +109,6 @@ public class BlueA extends LinearOpMode {
 
     }
 
-    //void moveCst(double position){
-    //cassette.setPosition(position);
-    //}
-    private void outtake() {
-        // TODO outtake
-        // Need to move arm, drop pxl, and get arm back to start position
-        moveArm(armDropPos);
-
-        // Moving bot slightly forward to let pixel fall
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-                        .strafeToConstantHeading(new Vector2d(drive.pose.position.x, drive.pose.position.y))
-                        .build()
-                // TODO find correct values for x and y
-        );
-
-        moveArm(armStartPos);
-
-    }
-
-    private void turn(double angle){
-
-        double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-        // angle going from 0 90 180 - 90 0
-        if (angle < 180 && angle > 0){
-            while (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < angle){
-                leftFront.setPower(-0.5);
-                rightFront.setPower(0.5);
-                leftBack.setPower(-0.5);
-                rightBack.setPower(0.5);
-            }
-        }else if (angle > -180 && angle < 0){
-            while (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > angle){
-                leftFront.setPower(0.5);
-                rightFront.setPower(-0.5);
-                leftBack.setPower(0.5);
-                rightBack.setPower(-0.5);
-            }
-
-
-
-        }
-
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
-
-    }
     private void moveBot(double inches){
         double inPerTick = MecanumDrive.PARAMS.inPerTick;
         int startPar0 = par0.getPositionAndVelocity().position;
@@ -275,7 +221,8 @@ public class BlueA extends LinearOpMode {
                     rightBack.setPower(0);
                     rightFront.setPower(0);
                     leftBack.setPower(0);
-                    //sleep(5);
+                    sleep(20);
+                    break;
 
                 }
                 currPosition = perp.getPositionAndVelocity().position;
@@ -294,7 +241,8 @@ public class BlueA extends LinearOpMode {
                     rightBack.setPower(0);
                     rightFront.setPower(0);
                     leftBack.setPower(0);
-                    //sleep(20);
+                    sleep(20);
+                    break;
 
                 }
                 currPosition = perp.getPositionAndVelocity().position;
@@ -347,14 +295,6 @@ public class BlueA extends LinearOpMode {
     private void drop(){
         claw.setPosition(-0.3); // 0.2 // 0
     }
-    private void outtakeWhitePxl(){
-        // TODO white pxl outtake
-        drop();
-    }
-    private void pickWhitePxl(){
-        // TODO intake
-        pick();
-    }
 
     void powerCassette(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
@@ -366,8 +306,8 @@ public class BlueA extends LinearOpMode {
 
     void moveCassetteDown(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() - 0.05 > CST_UPPER_BOUND){
-                cassette.setPosition(cassette.getPosition() - 0.05);
+            if (cassette.getPosition() - 0.055 > CST_UPPER_BOUND){
+                cassette.setPosition(cassette.getPosition() - 0.055);
                 sleep(100);
             }else{
                 cassette.setPosition(CST_UPPER_BOUND);
@@ -382,8 +322,8 @@ public class BlueA extends LinearOpMode {
 
     void moveCassetteUp(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() + 0.05 < CST_LOWER_BOUND){
-                cassette.setPosition(cassette.getPosition() + 0.05);
+            if (cassette.getPosition() + 0.055 < CST_LOWER_BOUND){
+                cassette.setPosition(cassette.getPosition() + 0.055);
                 sleep(100);
             }else{
                 cassette.setPosition(CST_LOWER_BOUND);
@@ -525,7 +465,6 @@ public class BlueA extends LinearOpMode {
 
     }
     private void findTeamProp(){
-        // TODO Find team prop
         final int propNumID = pipeline.position;
         if (propNumID == 1){
             propDirectionID = PropDirection.LEFT;
@@ -589,7 +528,7 @@ public class BlueA extends LinearOpMode {
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
 //                                .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 2))
-                                .lineToX(-51, new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 30))
+                                .lineToX(-53, new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 30))
                                 //.strafeTo(new Vector2d(drive.pose.position.x, -56))
                                 .build()
                 );
@@ -598,7 +537,6 @@ public class BlueA extends LinearOpMode {
             }
 
         }else if (propDirectionID == PropDirection.MIDDLE){
-            // TODO
             telemetry.addData("DIRECTION", propDirectionID);
             telemetry.update();
             Actions.runBlocking(
@@ -702,9 +640,9 @@ public class BlueA extends LinearOpMode {
         double STRAFE_GAIN =  0.015;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
         double TURN_GAIN   =   0.015;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
-        final double MAX_AUTO_SPEED = 0.6;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_TURN  = 0.4;   //  Clip the turn speed to this max value (adjust for your robot)
+        final double MAX_AUTO_SPEED = 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
+        final double MAX_AUTO_STRAFE= 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
+        final double MAX_AUTO_TURN  = 0;   //  Clip the turn speed to this max value (adjust for your robot)
 
         // Initialize the April tag Detection process
         initAprilTag();
@@ -717,8 +655,7 @@ public class BlueA extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
 
-        // TODO change break condition
-        while (time1.time() < 1.3){
+        while (time1.time() < 1.6){
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("Detections", aprilTag.getDetections());
             for (AprilTagDetection detection : currentDetections) {
@@ -764,6 +701,7 @@ public class BlueA extends LinearOpMode {
                 }
             } else {
                 if (!hasMoved){
+                    time1.reset();
                     if (!currentDetections.isEmpty()){
                         if (currentDetections.get(0).id < DESIRED_TAG_ID){
                             Actions.runBlocking(
@@ -794,13 +732,20 @@ public class BlueA extends LinearOpMode {
         TURN_GAIN = 0;
 
 
-        drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
+        //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
 
         sleep(1000);
         leftFront.setPower(0);
         leftBack.setPower(0);
         rightFront.setPower(0);
         rightBack.setPower(0);
+
+//        if (propDirectionID == PropDirection.RIGHT){
+//            strafeBot(-2.5);
+//        }
+
+        sleep(2000);
+
 
 
         drive.updatePoseEstimate();
@@ -810,10 +755,10 @@ public class BlueA extends LinearOpMode {
         //outtake();
         setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
         sleep(200);
-        door.setPosition(0.3);
+        door.setPosition(0);
         sleep(300);
         setArmPos((int) ARM_START_POS, armMotor, cassette);
-        door.setPosition(0.65);
+        door.setPosition(0.6);
 
 
     }
@@ -830,7 +775,7 @@ public class BlueA extends LinearOpMode {
 
         );
 
-        moveBot(-5);
+        moveBot(-7);
 
 
     }

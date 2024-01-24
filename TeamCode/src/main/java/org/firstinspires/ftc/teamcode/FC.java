@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @TeleOp(name = "TeleOP", group = "Current")
 public class FC extends LinearOpMode {
@@ -46,9 +47,7 @@ public class FC extends LinearOpMode {
 
         public double ARM_TICKS_PER_REV = 384.5;
         public double ARM_START_POS;
-        public double ARM_DEGREES_PER_MILLISECOND = 0.0818525; // TODO ARM_DEGREES_PER_MILLISECOND
         // RPM / 60 -> RPS / 1000 -> RPMS x 11.29 (degrees per rev)
-        public double CST_UNIT_PER_DEG = 1/ 300.0; // TODO Calculate value of 0.1 of servo value
         // 1 rotation is 270 degrees
         public double cassetteMoveIncrement = 0.05; //0.0818525/360 * CST_UNIT_PER_DEG;
         public double CST_UPPER_BOUND = 0;
@@ -120,29 +119,30 @@ public class FC extends LinearOpMode {
         }
     }
 
-    private void setArmPos(int position, DcMotorEx armMotor, Servo cassette){
-        armMotor.setTargetPosition(position);
-        armMotor.setPower(1);
-        powerCassette(cassette);
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        int currentArmPos = armMotor.getCurrentPosition();
-        while (armMotor.isBusy()){
-            if (position > currentArmPos){
-                moveCassetteUp(cassette);
+    private void setArmPos(int position, DcMotorEx armMotor, Servo cassette, Encoder par0, Encoder par1, Encoder perp){
+        sleep(50);
+        double tolerance = 300;
+        int par0Pos = par0.getPositionAndVelocity().position;
+        int par1Pos = par1.getPositionAndVelocity().position;
+        int perpPos = perp.getPositionAndVelocity().position;
+        ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        time1.reset();
+        while (armMotor.getCurrentPosition() != position && Math.abs(position - armMotor.getCurrentPosition()) > tolerance) {
 
+            // obtain the encoder position
+            double encoderPosition = armMotor.getCurrentPosition();
+            // calculate the error
+            double error = position - encoderPosition;
+            // set motor power proportional to the error
+            armMotor.setPower(error);
+            if (position > encoderPosition){
+                moveCassetteUp(cassette);
             }else{
                 moveCassetteDown(cassette);
-
             }
-            telemetry.addData("Cassette Pos", cassette.getPosition());
-            telemetry.addLine("Waiting for arm to reach position");
-            telemetry.addData("Target Pos", position);
-            telemetry.addData("Arm Ticks", armMotor.getCurrentPosition());
-            telemetry.update();
+
         }
-        armMotor.setPower(0);
-        // stopping cassette
-        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sleep(50);
     }
     public double angleWrap(double radians){
         while(radians > Math.PI){
@@ -167,7 +167,7 @@ public class FC extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         double targetHeading = Math.toRadians(0);
-        double tolerance = 0.01;
+        double tolerance = 0.001;
         Motor leftFront = new Motor(hardwareMap, "frntLF");
         Motor leftBack = new Motor(hardwareMap, "bckLF");
         Motor rightBack = new Motor(hardwareMap, "bckRT");
@@ -181,7 +181,7 @@ public class FC extends LinearOpMode {
 
         Servo claw = hardwareMap.servo.get("claw");
         Servo cassette = hardwareMap.servo.get("cassette");
-        CRServo flicker = hardwareMap.crservo.get("drone");
+        Servo flicker = hardwareMap.servo.get("drone");
         Servo door = hardwareMap.servo.get("door");
         CRServo intake_L = hardwareMap.crservo.get("intakeL");
         CRServo intake_R = hardwareMap.crservo.get("intakeR");
@@ -196,7 +196,7 @@ public class FC extends LinearOpMode {
             rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
             rightFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
             droneMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //            armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             // armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -241,14 +241,16 @@ public class FC extends LinearOpMode {
 
         waitForStart();
 
+        cassette.setPosition(1);
+
         while (!isStopRequested()) {
             double loop = System.nanoTime();
 
             if (driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance)){
                 PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
                 drive.driveFieldCentric(
-                        driverOp.getLeftX(),
-                        driverOp.getLeftY(),
+                        driverOp.getLeftX() * 0.7,
+                        driverOp.getLeftY() * 0.7,
                         driverOp.getRightX() * 0.5,
                         imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
                         false
@@ -258,7 +260,7 @@ public class FC extends LinearOpMode {
                 drive.driveFieldCentric(
                         driverOp.getLeftX(),
                         driverOp.getLeftY(),
-                        -PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS)),
+                        -PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS)), // negative because FTCLib input is inverted
                         imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
                         false
                 );
@@ -293,7 +295,7 @@ public class FC extends LinearOpMode {
                     telemetry.addLine("Drone Percent:" + droneMotor.getVelocity()/ VARS.maxTicksPerSec+"");
                     telemetry.update();
                     sleep(1000);
-                    flicker.setPower(1);
+                    flicker.setPosition(1);
                     sleep(2000);
 
                     //droneMotor.setPower(0);
@@ -301,7 +303,7 @@ public class FC extends LinearOpMode {
                 else{
                     droneMotor.setPower(0);
                     droneMotor.setVelocity(0);
-                    flicker.setPower(0);
+                    flicker.setPosition(0);
 
                 }
             }
@@ -321,7 +323,7 @@ public class FC extends LinearOpMode {
                 if (gamepad2.x){
                     // FIRST
                     //cassette.setPosition(VARS.CST_BD_L1_POS);
-                    setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L1_POS, armMotor, cassette);
+                    setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L1_POS, armMotor, cassette,leftEncoder, rightEncoder, frontEncoder);
                     // arm ticks = -5477 start = -65
 
                 }
@@ -329,19 +331,19 @@ public class FC extends LinearOpMode {
                 if (gamepad2.y){
                     // SECOND
                     //cassette.setPosition(VARS.CST_BD_L2_POS);
-                    setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L2_POS, armMotor, cassette);
+                    setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L2_POS, armMotor, cassette,leftEncoder, rightEncoder, frontEncoder);
                 }
 
                 if (gamepad2.b){
                     // THIRD
                     //cassette.setPosition(VARS.CST_BD_L3_POS);
-                    setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L3_POS, armMotor, cassette);
+                    setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L3_POS, armMotor, cassette,leftEncoder, rightEncoder, frontEncoder);
                 }
 
                 if (gamepad2.a){
                     // START
                     //cassette.setPosition(0.8);
-                    setArmPos((int) VARS.ARM_START_POS, armMotor, cassette);
+                    setArmPos((int) VARS.ARM_START_POS, armMotor, cassette,leftEncoder, rightEncoder, frontEncoder);
                 }
 
 
@@ -361,7 +363,11 @@ public class FC extends LinearOpMode {
 
             if (gamepad2.dpad_up){
                 armMotor.setPower(1);
-                pullMotor.setPower(0.5);
+                while (true){
+                    if (!(Math.abs(armMotor.getCurrent(CurrentUnit.AMPS)) < 6)) break;
+                    // waiting for stall before starting pull motor
+                }
+                pullMotor.setPower(0.75);
 
             }else if (!gamepad2.y && !gamepad2.a && !gamepad2.dpad_down){
                 armMotor.setPower(0);
@@ -370,7 +376,7 @@ public class FC extends LinearOpMode {
 
             if (gamepad2.dpad_down){
                 armMotor.setPower(-1);
-                pullMotor.setPower(-0.5);
+                pullMotor.setPower(-0.75);
 
             }else if (!gamepad2.y && !gamepad2.a && !gamepad2.dpad_up){
                 armMotor.setPower(0);
@@ -418,25 +424,7 @@ public class FC extends LinearOpMode {
                 powerCassette(cassette);
             }
 
-            if (gamepad2.b){
-                // switch to flat position
 
-                if (!Double.isNaN(cassette.getPosition())){
-                    if (cassette.getPosition() + 0.02 < VARS.CST_LOWER_BOUND){
-                        cassette.setPosition(cassette.getPosition() + 0.02);
-                        sleep(30);
-                    }else{
-                        cassette.setPosition(VARS.CST_LOWER_BOUND);
-                        sleep(30);
-                    }
-
-                }else{
-                    cassette.setPosition(0);
-                    sleep(30);
-                }
-
-
-            }
             if (VARS.CST_UP){
                 // switch to flat position
 
@@ -457,41 +445,113 @@ public class FC extends LinearOpMode {
 
             }
             if (gamepad2.dpad_left){
-                door.setPosition(0.3);
+                door.setPosition(0);
                 sleep(300);
-                door.setPosition(0.65);
+                door.setPosition(0.6);
             }
             if (gamepad2.dpad_right){
-                door.setPosition(0.3);
+                door.setPosition(0);
                 sleep(300);
-                door.setPosition(0.65);
+                door.setPosition(0.6);
             }
-            if (gamepad2.x){
-                // switch to parallel to backdrop position
-                if (!Double.isNaN(cassette.getPosition())){
-                    if (cassette.getPosition() - 0.02 > VARS.CST_UPPER_BOUND){
-                        if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
-                            if (cassette.getPosition() > 0.35){
-                                cassette.setPosition(cassette.getPosition() - 0.02);
+            if (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > -80 && imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < -100){
+                if (gamepad2.x){
+                    // switch to parallel to backdrop position
+                    if (!Double.isNaN(cassette.getPosition())){
+                        if (cassette.getPosition() - 0.04 > VARS.CST_UPPER_BOUND){
+                            if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
+                                if (cassette.getPosition() > 0.35){
+                                    cassette.setPosition(cassette.getPosition() - 0.04);
+                                }else{
+                                    cassette.setPosition(0.3);
+                                }
+
                             }else{
-                                cassette.setPosition(0.3);
+                                cassette.setPosition(cassette.getPosition() - 0.04);
                             }
 
+                            sleep(30);
                         }else{
-                            cassette.setPosition(cassette.getPosition() - 0.02);
+                            cassette.setPosition(VARS.CST_UPPER_BOUND);
+                            sleep(30);
                         }
-
-                        sleep(30);
                     }else{
-                        cassette.setPosition(VARS.CST_UPPER_BOUND);
+                        cassette.setPosition(0);
                         sleep(30);
                     }
-                }else{
-                    cassette.setPosition(0);
-                    sleep(30);
-                }
 
                 }
+
+                if (gamepad2.b){
+                    // switch to flat position
+
+                    if (!Double.isNaN(cassette.getPosition())){
+                        if (cassette.getPosition() + 0.04 < VARS.CST_LOWER_BOUND){
+                            cassette.setPosition(cassette.getPosition() + 0.04);
+                            sleep(30);
+                        }else{
+                            cassette.setPosition(VARS.CST_LOWER_BOUND);
+                            sleep(30);
+                        }
+
+                    }else{
+                        cassette.setPosition(0);
+                        sleep(30);
+                    }
+
+
+                }
+
+
+            }else{
+                if (gamepad2.b){
+                    // switch to parallel to backdrop position
+                    if (!Double.isNaN(cassette.getPosition())){
+                        if (cassette.getPosition() - 0.04 > VARS.CST_UPPER_BOUND){
+                            if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
+                                if (cassette.getPosition() > 0.35){
+                                    cassette.setPosition(cassette.getPosition() - 0.04);
+                                }else{
+                                    cassette.setPosition(0.3);
+                                }
+
+                            }else{
+                                cassette.setPosition(cassette.getPosition() - 0.04);
+                            }
+
+                            sleep(30);
+                        }else{
+                            cassette.setPosition(VARS.CST_UPPER_BOUND);
+                            sleep(30);
+                        }
+                    }else{
+                        cassette.setPosition(0);
+                        sleep(30);
+                    }
+
+                }
+
+                if (gamepad2.x){
+                    // switch to flat position
+
+                    if (!Double.isNaN(cassette.getPosition())){
+                        if (cassette.getPosition() + 0.04 < VARS.CST_LOWER_BOUND){
+                            cassette.setPosition(cassette.getPosition() + 0.04);
+                            sleep(30);
+                        }else{
+                            cassette.setPosition(VARS.CST_LOWER_BOUND);
+                            sleep(30);
+                        }
+
+                    }else{
+                        cassette.setPosition(0);
+                        sleep(30);
+                    }
+
+
+                }
+            }
+
 
             if (VARS.CST_DOWN){
                 // switch to parallel to backdrop position
