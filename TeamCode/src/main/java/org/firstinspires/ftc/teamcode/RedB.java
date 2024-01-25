@@ -188,6 +188,8 @@ public class RedB extends LinearOpMode {
         int perpPos = perp.getPositionAndVelocity().position;
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
+        // TODO break conditions of pushback in separate if condition
+
         while (armMotor.getCurrentPosition() != position && Math.abs(position - armMotor.getCurrentPosition()) > tolerance && ((Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)) &&  time1.time() < 2.5) {
             // obtain the encoder position
             leftFront.setPower(0);
@@ -569,6 +571,8 @@ public class RedB extends LinearOpMode {
 
         }
 
+        adjustPositionAprilTag();
+
 
 //        if (propDirectionID == PropDirection.MIDDLE){
 //            Actions.runBlocking(
@@ -581,6 +585,10 @@ public class RedB extends LinearOpMode {
 
 
 
+
+
+    }
+    private void adjustPositionAprilTag(){
         boolean targetFound     = false;    // Set to true when an AprilTag target is detected
         double  drive_          = 0;        // Desired forward power/speed (-1 to +1)
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
@@ -593,18 +601,9 @@ public class RedB extends LinearOpMode {
         if (propDirectionID == PropDirection.RIGHT){
             DESIRED_TAG_ID      = 6;
         }
-          // Desired turning power/speed (-1 to +1)
+        // Desired turning power/speed (-1 to +1)
         double DESIRED_DISTANCE = 10;
-
-//        if (propDirectionID == PropDirection.MIDDLE){
-//            DESIRED_DISTANCE = 11;
-//
-//        }
-//
-//        if (propDirectionID == PropDirection.RIGHT){
-//            DESIRED_DISTANCE = 10;
-//        }
-         //  this is how close the camera should get to the target (inches)
+        //  this is how close the camera should get to the target (inches)
 
         //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
         //  applied to the drive motors to correct the error.
@@ -709,10 +708,11 @@ public class RedB extends LinearOpMode {
         sleep(100);
 
         drive.updatePoseEstimate();
-
     }
     private void dropPxlTwo(){
         //outtake();
+        // TODO make copy of RTP setArmPos method
+        // TODO Use RTP as backup if closed loop method fails
         try{
             setArmPos((int) armMotor.getCurrentPosition() - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
         }catch (Exception e){
@@ -723,7 +723,13 @@ public class RedB extends LinearOpMode {
         sleep(200);
         door.setPosition(0);
         sleep(300);
-        setArmPos((int) ARM_START_POS, armMotor, cassette);
+        // arm coming back
+        try {
+            setArmPos((int) ARM_START_POS, armMotor, cassette);
+        }catch (Exception e){
+            telemetry.addLine(e.toString());
+            telemetry.update();
+        }
         door.setPosition(0.6);
 
     }
