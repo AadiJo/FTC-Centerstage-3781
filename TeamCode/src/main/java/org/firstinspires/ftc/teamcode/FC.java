@@ -181,7 +181,7 @@ public class FC extends LinearOpMode {
 
         Servo claw = hardwareMap.servo.get("claw");
         Servo cassette = hardwareMap.servo.get("cassette");
-        Servo flicker = hardwareMap.servo.get("drone");
+        CRServo flicker = hardwareMap.crservo.get("drone");
         Servo door = hardwareMap.servo.get("door");
         CRServo intake_L = hardwareMap.crservo.get("intakeL");
         CRServo intake_R = hardwareMap.crservo.get("intakeR");
@@ -291,19 +291,18 @@ public class FC extends LinearOpMode {
                     //droneMotor.setPower(-VARS.droneRPM / 1620);
                     droneMotor.setVelocity(-0.85 * VARS.maxTicksPerSec);
                     gamepad2.rumble(1, 1, 200);
-                    sleep(3000);
                     telemetry.addLine("Drone Percent:" + droneMotor.getVelocity()/ VARS.maxTicksPerSec+"");
                     telemetry.update();
                     sleep(1000);
-                    flicker.setPosition(1);
-                    sleep(2000);
+                    flicker.setPower(-1);
+                    sleep(200);
 
                     //droneMotor.setPower(0);
                 }
                 else{
                     droneMotor.setPower(0);
                     droneMotor.setVelocity(0);
-                    flicker.setPosition(0);
+                    flicker.setPower(0);
 
                 }
             }

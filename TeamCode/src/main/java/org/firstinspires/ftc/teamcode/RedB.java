@@ -189,8 +189,11 @@ public class RedB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         while (armMotor.getCurrentPosition() != position && Math.abs(position - armMotor.getCurrentPosition()) > tolerance && ((Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)) &&  time1.time() < 2.5) {
-
             // obtain the encoder position
+            leftFront.setPower(0);
+            leftBack.setPower(0);
+            rightFront.setPower(0);
+            rightBack.setPower(0);
             double encoderPosition = armMotor.getCurrentPosition();
             // calculate the error
             double error = position - encoderPosition;
@@ -531,7 +534,14 @@ public class RedB extends LinearOpMode {
 
     }
     private void dropSecondPxl(){
-        goToBackdrop(propDirectionID);
+        try {
+            goToBackdrop(propDirectionID);
+        }catch (Exception e){
+            telemetry.addLine(e.toString());
+            telemetry.update();
+        }
+
+        sleep(50);
         dropPxlTwo();
 
     }
@@ -605,7 +615,7 @@ public class RedB extends LinearOpMode {
 
         final double MAX_AUTO_SPEED = 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
         final double MAX_AUTO_STRAFE= 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_TURN  = 0;
+        final double MAX_AUTO_TURN  = 0.2;
         boolean hasMoved = false; //  Clip the turn speed to this max value (adjust for your robot)
 
         // Initialize the April tag Detection process
@@ -665,7 +675,6 @@ public class RedB extends LinearOpMode {
                 }
             } else {
                 if (!hasMoved){
-                    time1.reset();
                     if (!currentDetections.isEmpty()){
                         if (currentDetections.get(0).id < DESIRED_TAG_ID){
                             Actions.runBlocking(
@@ -695,23 +704,22 @@ public class RedB extends LinearOpMode {
         STRAFE_GAIN = 0;
         TURN_GAIN = 0;
 
-
         //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
 
-        sleep(1000);
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
-
+        sleep(100);
 
         drive.updatePoseEstimate();
 
     }
     private void dropPxlTwo(){
         //outtake();
+        try{
+            setArmPos((int) armMotor.getCurrentPosition() - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+        }catch (Exception e){
+            telemetry.addLine(e.toString());
+            telemetry.update();
+        }
 
-        setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
         sleep(200);
         door.setPosition(0);
         sleep(300);
