@@ -244,7 +244,7 @@ public class RedB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.2 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.5 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
             if (position > currentArmPos){
                 moveCassetteUp(cassette);
 
@@ -682,7 +682,7 @@ public class RedB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
 
-        while (time1.time() < 3.5){
+        while (time1.time() < 3){
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("Detections", aprilTag.getDetections());
             for (AprilTagDetection detection : currentDetections) {
@@ -801,7 +801,7 @@ public class RedB extends LinearOpMode {
         cassette.setPosition(cassette.getPosition() + 0.1);
         sleep(50);
         cassette.setPosition(cassette.getPosition() + 0.05);
-        sleep(1000);
+        sleep(500);
         door.setPosition(0);
         sleep(100);
 //        // arm coming back
@@ -811,6 +811,7 @@ public class RedB extends LinearOpMode {
             telemetry.addLine(e.toString());
             telemetry.update();
         }
+        sleep(200);
         door.setPosition(0.6);
 
     }

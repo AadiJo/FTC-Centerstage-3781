@@ -379,7 +379,7 @@ public class BlueA extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.2 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 6 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
             if (position > currentArmPos){
                 moveCassetteUp(cassette);
 
@@ -666,7 +666,7 @@ public class BlueA extends LinearOpMode {
             DESIRED_TAG_ID      = 3;
         }
         // Desired turning power/speed (-1 to +1)
-        final double DESIRED_DISTANCE = 11.45; //  this is how close the camera should get to the target (inches)
+        double DESIRED_DISTANCE = 10.5; //  this is how close the camera should get to the target (inches)
 
         //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
         //  applied to the drive motors to correct the error.
@@ -767,9 +767,7 @@ public class BlueA extends LinearOpMode {
         STRAFE_GAIN = 0;
         TURN_GAIN = 0;
         sleep(300);
-        if (propDirectionID == PropDirection.MIDDLE){
-            strafeBot(-0.6);
-        }
+        strafeBot(-0.6);
 
         //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
 
@@ -802,14 +800,20 @@ public class BlueA extends LinearOpMode {
         cassette.setPosition(cassette.getPosition() + 0.05);
         sleep(1000);
         door.setPosition(0);
-        sleep(100);
+        sleep(200);
 //        // arm coming back
-        try {
-            OLDsetArmPos((int) startPos, armMotor, cassette);
-        }catch (Exception e){
-            telemetry.addLine(e.toString());
-            telemetry.update();
-        }
+//        try {
+//            OLDsetArmPos((int) startPos, armMotor, cassette);
+//            //sleep(200);
+//        }catch (Exception e){
+//            telemetry.addLine(e.toString());
+//            telemetry.update();
+//        }
+
+        armMotor.setPower(1);
+        sleep(1500);
+        armMotor.setPower(0);
+        sleep(50);
         door.setPosition(0.6);
 
 

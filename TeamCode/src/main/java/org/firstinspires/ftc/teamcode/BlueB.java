@@ -222,7 +222,7 @@ public class BlueB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.2 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.5 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
             if (position > currentArmPos){
                 moveCassetteUp(cassette);
 
@@ -777,7 +777,6 @@ public class BlueB extends LinearOpMode {
         }
 
 //        sleep(200);
-
         sleep(10);
         cassette.setPosition(cassette.getPosition() + 0.1);
         sleep(50);
@@ -794,6 +793,7 @@ public class BlueB extends LinearOpMode {
             telemetry.addLine(e.toString());
             telemetry.update();
         }
+        sleep(500);
         door.setPosition(0.6);
 
     }

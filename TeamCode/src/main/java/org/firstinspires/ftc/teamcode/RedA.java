@@ -357,7 +357,7 @@ public class RedA extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.2 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 6 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
             if (position > currentArmPos){
                 moveCassetteUp();
 
@@ -649,7 +649,7 @@ public class RedA extends LinearOpMode {
             DESIRED_TAG_ID      = 6;
         }
         // Desired turning power/speed (-1 to +1)
-        double DESIRED_DISTANCE = 11.45;
+        double DESIRED_DISTANCE = 10;
         //  this is how close the camera should get to the target (inches)
 
         //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
@@ -675,7 +675,7 @@ public class RedA extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
 
-        while (time1.time() < 3.5){
+        while (time1.time() < 3){
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("Detections", aprilTag.getDetections());
             for (AprilTagDetection detection : currentDetections) {
@@ -798,12 +798,16 @@ public class RedA extends LinearOpMode {
         door.setPosition(0);
         sleep(100);
 //        // arm coming back
-        try {
-            OLDsetArmPos((int) startPos, armMotor, cassette);
-        }catch (Exception e){
-            telemetry.addLine(e.toString());
-            telemetry.update();
-        }
+//        try {
+//            OLDsetArmPos((int) startPos, armMotor, cassette);
+//        }catch (Exception e){
+//            telemetry.addLine(e.toString());
+//            telemetry.update();
+//        }
+        armMotor.setPower(1);
+        sleep(1500);
+        armMotor.setPower(0);
+        sleep(50);
         door.setPosition(0.6);
 
 
@@ -868,7 +872,7 @@ public class RedA extends LinearOpMode {
         // Only one loop was possible
         //pickAndDropWhitePxl();
         //setupForPark();
-        park();
+//        park();
 
 
         //dropSecondPxl(drive, startXPos, startYPos, l_turn, r_turn);
