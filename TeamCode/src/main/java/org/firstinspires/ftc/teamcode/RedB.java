@@ -151,8 +151,8 @@ public class RedB extends LinearOpMode {
 
     void moveCassetteDown(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() - 0.055 > CST_UPPER_BOUND){
-                cassette.setPosition(cassette.getPosition() - 0.055);
+            if (cassette.getPosition() - 0.045 > CST_UPPER_BOUND){
+                cassette.setPosition(cassette.getPosition() - 0.045);
                 sleep(100);
             }else{
                 cassette.setPosition(CST_UPPER_BOUND);
@@ -167,8 +167,8 @@ public class RedB extends LinearOpMode {
 
     void moveCassetteUp(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() + 0.055 < CST_LOWER_BOUND){
-                cassette.setPosition(cassette.getPosition() + 0.055);
+            if (cassette.getPosition() + 0.045 < CST_LOWER_BOUND){
+                cassette.setPosition(cassette.getPosition() + 0.045);
                 sleep(100);
             }else{
                 cassette.setPosition(CST_LOWER_BOUND);
@@ -181,6 +181,10 @@ public class RedB extends LinearOpMode {
         }
     }
     private void setArmPos(int position, DcMotorEx armMotor, Servo cassette){
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
         sleep(50);
         double tolerance = 30;
         int par0Pos = par0.getPositionAndVelocity().position;
@@ -189,26 +193,76 @@ public class RedB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         // TODO break conditions of pushback in separate if condition
-
-        while (armMotor.getCurrentPosition() != position && Math.abs(position - armMotor.getCurrentPosition()) > tolerance && ((Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)) &&  time1.time() < 2.5) {
+        int currentPos = armMotor.getCurrentPosition();
+        telemetry.addData("Before loop ticks", currentPos);
+        while (Math.abs(position - currentPos) > tolerance){//&& ((Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)) &&  time1.time() < 2.5) {
             // obtain the encoder position
             leftFront.setPower(0);
             leftBack.setPower(0);
             rightFront.setPower(0);
             rightBack.setPower(0);
-            double encoderPosition = armMotor.getCurrentPosition();
+
+            telemetry.addData("Current Pos", armMotor.getCurrentPosition());
+            telemetry.addData("Target Pos", position);
+            telemetry.update();
             // calculate the error
-            double error = position - encoderPosition;
+            double error = position - currentPos;
             // set motor power proportional to the error
-            armMotor.setPower(error);
-            if (position > encoderPosition){
+//            if (error < 0){
+//                armMotor.setPower(-0.8);
+//            }
+//            if (error > 0){
+//                armMotor.setPower(0.8);
+//            }else{
+//                armMotor.setPower(0);
+//            }
+
+            armMotor.setPower(0.8);
+
+            if (position > currentPos){
                 moveCassetteUp(cassette);
             }else{
                 moveCassetteDown(cassette);
             }
 
+            currentPos = armMotor.getCurrentPosition();
+
+
         }
         sleep(50);
+    }
+
+    private void OLDsetArmPos(int position, DcMotorEx armMotor, Servo cassette){
+        sleep(50);
+        armMotor.setTargetPosition(position);
+        armMotor.setPower(-1);
+        int par0Pos = par0.getPositionAndVelocity().position;
+        int par1Pos = par1.getPositionAndVelocity().position;
+        int perpPos = perp.getPositionAndVelocity().position;
+        powerCassette(cassette);
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        time1.reset();
+        int currentArmPos = armMotor.getCurrentPosition();
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.2 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
+            if (position > currentArmPos){
+                moveCassetteUp(cassette);
+
+            }else{
+                moveCassetteDown(cassette);
+
+            }
+            telemetry.addData("Cassette Pos", cassette.getPosition());
+            telemetry.addLine("Waiting for arm to reach position");
+            telemetry.addData("Target Pos", position);
+            telemetry.addData("Arm Ticks", armMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        armMotor.setPower(0);
+        sleep(70);
+        // stopping cassette
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
     }
 
     private void moveBot(double inches){
@@ -602,7 +656,7 @@ public class RedB extends LinearOpMode {
             DESIRED_TAG_ID      = 6;
         }
         // Desired turning power/speed (-1 to +1)
-        double DESIRED_DISTANCE = 10;
+        double DESIRED_DISTANCE = 11.45;
         //  this is how close the camera should get to the target (inches)
 
         //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
@@ -628,7 +682,7 @@ public class RedB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
 
-        while (time1.time() < 1.6){
+        while (time1.time() < 3.5){
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("Detections", aprilTag.getDetections());
             for (AprilTagDetection detection : currentDetections) {
@@ -674,6 +728,7 @@ public class RedB extends LinearOpMode {
                 }
             } else {
                 if (!hasMoved){
+                    time1.reset();
                     if (!currentDetections.isEmpty()){
                         if (currentDetections.get(0).id < DESIRED_TAG_ID){
                             Actions.runBlocking(
@@ -703,29 +758,55 @@ public class RedB extends LinearOpMode {
         STRAFE_GAIN = 0;
         TURN_GAIN = 0;
 
-        //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
+//        if (propDirectionID == PropDirection.RIGHT){
+//            strafeBot(-0.2);
+//        }if(propDirectionID == PropDirection.LEFT){
+//            strafeBot(0.2);
+//        }
+//        if (propDirectionID == PropDirection.MIDDLE){
+//            strafeBot(-0.6);
+//        }
 
-        sleep(100);
+        if (propDirectionID == PropDirection.MIDDLE){
+            strafeBot(-0.6);
+        }
+
+        //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
+        leftBack.setPower(0);
+        leftFront.setPower(0);
+        rightBack.setPower(0);
+        rightFront.setPower(0);
 
         drive.updatePoseEstimate();
+
+
     }
     private void dropPxlTwo(){
         //outtake();
         // TODO make copy of RTP setArmPos method
         // TODO Use RTP as backup if closed loop method fails
+        int startPos = armMotor.getCurrentPosition();
         try{
-            setArmPos((int) armMotor.getCurrentPosition() - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+            OLDsetArmPos((int) startPos - ARM_BD_X_POS, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
         }catch (Exception e){
             telemetry.addLine(e.toString());
             telemetry.update();
         }
 
-        sleep(200);
+//        sleep(200);
+
+        sleep(10);
+        cassette.setPosition(cassette.getPosition() + 0.1);
+        sleep(50);
+        cassette.setPosition(cassette.getPosition() + 0.1);
+        sleep(50);
+        cassette.setPosition(cassette.getPosition() + 0.05);
+        sleep(1000);
         door.setPosition(0);
-        sleep(300);
-        // arm coming back
+        sleep(100);
+//        // arm coming back
         try {
-            setArmPos((int) ARM_START_POS, armMotor, cassette);
+            OLDsetArmPos((int) startPos, armMotor, cassette);
         }catch (Exception e){
             telemetry.addLine(e.toString());
             telemetry.update();
@@ -737,13 +818,13 @@ public class RedB extends LinearOpMode {
     private void park(){
         Actions.runBlocking(
                 drive.actionBuilder(drive.pose)
-                        .strafeTo(new Vector2d(drive.pose.position.x, -62))
+                        .strafeTo(new Vector2d(drive.pose.position.x, -58))
                         .build()
         );
 
         Actions.runBlocking(
                 drive.actionBuilder(drive.pose)
-                        .strafeToLinearHeading(new Vector2d(drive.pose.position.x + 12, drive.pose.position.y), Math.toRadians(90))
+                        .strafeToLinearHeading(new Vector2d(drive.pose.position.x + 15, drive.pose.position.y), Math.toRadians(90))
                         .build()
         );
 

@@ -155,8 +155,8 @@ public class BlueB extends LinearOpMode {
 
     void moveCassetteDown(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() - 0.055 > CST_UPPER_BOUND){
-                cassette.setPosition(cassette.getPosition() - 0.055);
+            if (cassette.getPosition() - 0.04 > CST_UPPER_BOUND){
+                cassette.setPosition(cassette.getPosition() - 0.04);
                 sleep(100);
             }else{
                 cassette.setPosition(CST_UPPER_BOUND);
@@ -171,8 +171,8 @@ public class BlueB extends LinearOpMode {
 
     void moveCassetteUp(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() + 0.055 < CST_LOWER_BOUND){
-                cassette.setPosition(cassette.getPosition() + 0.055);
+            if (cassette.getPosition() + 0.04 < CST_LOWER_BOUND){
+                cassette.setPosition(cassette.getPosition() + 0.04);
                 sleep(100);
             }else{
                 cassette.setPosition(CST_LOWER_BOUND);
@@ -208,6 +208,40 @@ public class BlueB extends LinearOpMode {
 
         }
         sleep(50);
+    }
+
+    private void OLDsetArmPos(int position, DcMotorEx armMotor, Servo cassette){
+        sleep(50);
+        armMotor.setTargetPosition(position);
+        armMotor.setPower(-1);
+        int par0Pos = par0.getPositionAndVelocity().position;
+        int par1Pos = par1.getPositionAndVelocity().position;
+        int perpPos = perp.getPositionAndVelocity().position;
+        powerCassette(cassette);
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        time1.reset();
+        int currentArmPos = armMotor.getCurrentPosition();
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.2 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
+            if (position > currentArmPos){
+                moveCassetteUp(cassette);
+
+            }else{
+                moveCassetteDown(cassette);
+
+            }
+            telemetry.addData("Cassette Pos", cassette.getPosition());
+            telemetry.addLine("Waiting for arm to reach position");
+            telemetry.addData("Target Pos", position);
+            telemetry.addData("Arm Ticks", armMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        armMotor.setPower(0);
+        sleep(70);
+        // stopping cassette
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
     }
     private void moveBot(double inches){
         double inPerTick = MecanumDrive.PARAMS.inPerTick;
@@ -610,7 +644,7 @@ public class BlueB extends LinearOpMode {
             DESIRED_TAG_ID      = 3;
         }
         // Desired turning power/speed (-1 to +1)
-        final double DESIRED_DISTANCE = 10; //  this is how close the camera should get to the target (inches)
+        final double DESIRED_DISTANCE = 11.45; //  this is how close the camera should get to the target (inches)
 
         //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
         //  applied to the drive motors to correct the error.
@@ -621,7 +655,7 @@ public class BlueB extends LinearOpMode {
 
         final double MAX_AUTO_SPEED = 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
         final double MAX_AUTO_STRAFE= 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_TURN  = 0;
+        final double MAX_AUTO_TURN  = 0.2;
         boolean hasMoved = false; //  Clip the turn speed to this max value (adjust for your robot)
 
         // Initialize the April tag Detection process
@@ -635,7 +669,7 @@ public class BlueB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
 
-        while (time1.time() < 1.6){
+        while (time1.time() < 3.5){
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             telemetry.addData("Detections", aprilTag.getDetections());
             for (AprilTagDetection detection : currentDetections) {
@@ -710,11 +744,13 @@ public class BlueB extends LinearOpMode {
         SPEED_GAIN = 0;
         STRAFE_GAIN = 0;
         TURN_GAIN = 0;
-
+        sleep(300);
+        if (propDirectionID == PropDirection.MIDDLE){
+            strafeBot(-0.6);
+        }
 
         //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
 
-        sleep(1000);
         leftFront.setPower(0);
         leftBack.setPower(0);
         rightFront.setPower(0);
@@ -726,18 +762,45 @@ public class BlueB extends LinearOpMode {
     }
     private void dropPxlTwo(){
         //outtake();
-        setArmPos((int) ARM_START_POS - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
-        sleep(200);
+//        OLDsetArmPos((int) ARM_START_POS - ARM_BD_X_POS + 80, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+//        sleep(200);
+//        door.setPosition(0);
+//        sleep(300);
+//        OLDsetArmPos((int) ARM_START_POS, armMotor, cassette);
+//        door.setPosition(0.6);
+        int startPos = armMotor.getCurrentPosition();
+        try{
+            OLDsetArmPos((int) startPos - ARM_BD_X_POS, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+        }catch (Exception e){
+            telemetry.addLine(e.toString());
+            telemetry.update();
+        }
+
+//        sleep(200);
+
+        sleep(10);
+        cassette.setPosition(cassette.getPosition() + 0.1);
+        sleep(50);
+        cassette.setPosition(cassette.getPosition() + 0.1);
+        sleep(50);
+        cassette.setPosition(cassette.getPosition() + 0.05);
+        sleep(1000);
         door.setPosition(0);
-        sleep(300);
-        setArmPos((int) ARM_START_POS, armMotor, cassette);
+        sleep(100);
+//        // arm coming back
+        try {
+            OLDsetArmPos((int) startPos, armMotor, cassette);
+        }catch (Exception e){
+            telemetry.addLine(e.toString());
+            telemetry.update();
+        }
         door.setPosition(0.6);
 
     }
     private void park(){
         Actions.runBlocking(
                 drive.actionBuilder(drive.pose)
-                        .strafeTo(new Vector2d(drive.pose.position.x, 62))
+                        .strafeTo(new Vector2d(drive.pose.position.x, 58))
                         .build()
         );
 

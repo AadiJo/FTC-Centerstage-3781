@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -206,6 +207,7 @@ public class FC extends LinearOpMode {
             leftBack.setInverted(true);
             rightBack.setInverted(true);
             rightFront.setInverted(true);
+            pullMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 //            leftFront.setInverted(true);
             // cassette.setDirection(Servo.Direction.REVERSE);
             // armMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -366,7 +368,7 @@ public class FC extends LinearOpMode {
                     if (!(Math.abs(armMotor.getCurrent(CurrentUnit.AMPS)) < 6)) break;
                     // waiting for stall before starting pull motor
                 }
-                pullMotor.setPower(0.75);
+                pullMotor.setPower(-0.75);
 
             }else if (!gamepad2.y && !gamepad2.a && !gamepad2.dpad_down){
                 armMotor.setPower(0);
@@ -375,7 +377,7 @@ public class FC extends LinearOpMode {
 
             if (gamepad2.dpad_down){
                 armMotor.setPower(-1);
-                pullMotor.setPower(-0.75);
+                pullMotor.setPower(0.75);
 
             }else if (!gamepad2.y && !gamepad2.a && !gamepad2.dpad_up){
                 armMotor.setPower(0);

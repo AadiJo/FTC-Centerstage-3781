@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
@@ -16,6 +17,7 @@ public class PullTesting extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
         pullMotor = hardwareMap.get(DcMotorEx.class, "frontEncoder");
+        pullMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         double armMotorPower = 1;
         double pullMotorPower = 0.75;
