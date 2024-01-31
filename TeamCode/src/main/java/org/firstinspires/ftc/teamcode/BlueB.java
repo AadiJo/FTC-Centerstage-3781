@@ -57,7 +57,7 @@ public class BlueB extends LinearOpMode {
         MIDDLE
     }
 
-    final double startXPos = 16.5;
+    final double startXPos = 16;
     final double startYPos = 60;
 
     public double CST_UPPER_BOUND = 0;
@@ -100,6 +100,7 @@ public class BlueB extends LinearOpMode {
         if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
             telemetry.addData("Camera", "Waiting");
             telemetry.update();
+            // TODO optimize: see if sleep can be removed
             while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
                 sleep(20);
             }
@@ -533,25 +534,11 @@ public class BlueB extends LinearOpMode {
             telemetry.update();
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
-                            //.splineTo(new Vector2d(30, 30), Math.PI / 2)
-                            //.splineTo(new Vector2d(60, 0), Math.PI)
-//                        .splineTo(new Vector2d(-36.50, -36.50), Math.toRadians(0))
-                            .strafeToLinearHeading(new Vector2d(30, 35), Math.toRadians(180), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 40))//was 24, 24// why was this + 24 if it doesnt go up in y value
-//                            .splineTo(new Vector2d(36.78, 52.12), Math.toRadians(-59.53))
-//                            .splineTo(new Vector2d(33.66, 34.79), Math.toRadians(184.94))
-//                            .strafeTo(new Vector2d(-40, drive.pose.position.y))
-//                            .strafeTo(new Vector2d(-40, 20))
+
+                            .strafeToLinearHeading(new Vector2d(30, 35), Math.toRadians(180), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-70, 70))//was 24, 24// why was this + 24 if it doesnt go up in y value
+//                            .splineToSplineHeading(new Pose2d(35, 35, Math.toRadians(180)), Math.toRadians(180))
                             .build());
-//            Actions.runBlocking(
-//                    (Action) (trajectoryBuilder
-//                            //.splineTo(new Vector2d(30, 30), Math.PI / 2)
-//                            //.splineTo(new Vector2d(60, 0), Math.PI)
-////                        .splineTo(new Vector2d(-36.50, -36.50), Math.toRadians(0))
-//                            .strafeToLinearHeading(new Vector2d(drive.pose.position.x + 35, drive.pose.position.y + 19), Math.toRadians(-90))//was 24, 24// why was this + 24 if it doesnt go up in y value
-//                            .build()));
-
-
-            // turn(-90);
+            // TODO optimize: remove sleep
             sleep(50);
             if (propDirectionID == PropDirection.LEFT){
                 drop();
@@ -563,6 +550,7 @@ public class BlueB extends LinearOpMode {
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
                                 .strafeTo(new Vector2d(7, drive.pose.position.y))
+//                                .splineToConstantHeading(new Vector2d(12.5, 35), Math.toRadians(0))
                                 .build()
                 );
 
@@ -596,15 +584,16 @@ public class BlueB extends LinearOpMode {
     }
     private void goToBackdrop(PropDirection propDirectionID){
         drive.updatePoseEstimate();
+        // TODO optimize: remove sleep
         sleep(50);
         if (propDirectionID == PropDirection.LEFT || propDirectionID == PropDirection.RIGHT){
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
                             // Right in front of backdrop
-                            //.strafeToConstantHeading(new Vector2d(-36.36, 39.6))
-                            .strafeTo(new Vector2d(38, 33))//  was -36.36, 39.6, +4
-                            .turn(Math.toRadians(180), new TurnConstraints(10, -10, 10))
-                            //.turn(Math.toRadians(180))
+//                            .strafeTo(new Vector2d(38, 33))//  was -36.36, 39.6, +4
+//                            .turn(Math.toRadians(180), new TurnConstraints(10, -10, 10))
+                            .strafeTo(new Vector2d(20, 35))
+                            .strafeToLinearHeading(new Vector2d(42, 35), Math.toRadians(0))
                             .build()
             );
         }else{
@@ -659,6 +648,7 @@ public class BlueB extends LinearOpMode {
         boolean hasMoved = false; //  Clip the turn speed to this max value (adjust for your robot)
 
         // Initialize the April tag Detection process
+        // TODO optimize: see if initializing can go before start
         initAprilTag();
 
         setManualExposure(6, 250);
@@ -736,6 +726,7 @@ public class BlueB extends LinearOpMode {
 
             }
             telemetry.update();
+            // TODO optimize: remove sleep
             sleep(10);
         }
         drive_ = 0;
@@ -744,6 +735,7 @@ public class BlueB extends LinearOpMode {
         SPEED_GAIN = 0;
         STRAFE_GAIN = 0;
         TURN_GAIN = 0;
+        // TODO optimize: remove sleep
         sleep(300);
         if (propDirectionID == PropDirection.MIDDLE){
             strafeBot(-0.6);
@@ -783,6 +775,7 @@ public class BlueB extends LinearOpMode {
         cassette.setPosition(cassette.getPosition() + 0.1);
         sleep(50);
         cassette.setPosition(cassette.getPosition() + 0.05);
+        // TODO optimize: remove sleep
         sleep(1000);
         door.setPosition(0);
         sleep(100);
@@ -793,6 +786,7 @@ public class BlueB extends LinearOpMode {
             telemetry.addLine(e.toString());
             telemetry.update();
         }
+        // TODO optimize: remove sleep
         sleep(500);
         door.setPosition(0.6);
 
@@ -850,7 +844,8 @@ public class BlueB extends LinearOpMode {
 //        pick();
 //        strafeBot(24);
         //moveBot(-24);
-        strafeBot(-4);
+        strafeBot(-2);
+        // TODO optimize: remove sleep
         sleep(100);
         dropFirstPxl();
         dropSecondPxl();

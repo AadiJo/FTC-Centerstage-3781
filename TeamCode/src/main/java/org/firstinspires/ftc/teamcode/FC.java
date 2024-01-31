@@ -90,8 +90,8 @@ public class FC extends LinearOpMode {
 
     void moveCassetteDown(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() - 0.05 > VARS.CST_UPPER_BOUND){
-                cassette.setPosition(cassette.getPosition() - 0.05);
+            if (cassette.getPosition() - 0.035 > VARS.CST_UPPER_BOUND){
+                cassette.setPosition(cassette.getPosition() - 0.035);
                 sleep(100);
             }else{
                 cassette.setPosition(VARS.CST_UPPER_BOUND);
@@ -106,8 +106,8 @@ public class FC extends LinearOpMode {
 
     void moveCassetteUp(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() + 0.05 < VARS.CST_LOWER_BOUND){
-                cassette.setPosition(cassette.getPosition() + 0.05);
+            if (cassette.getPosition() + 0.035 < VARS.CST_LOWER_BOUND){
+                cassette.setPosition(cassette.getPosition() + 0.035);
                 sleep(100);
             }else{
                 cassette.setPosition(VARS.CST_LOWER_BOUND);
@@ -169,6 +169,7 @@ public class FC extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         double targetHeading = Math.toRadians(0);
         double tolerance = 0.001;
+        double multiplier = 0.7;
         Motor leftFront = new Motor(hardwareMap, "frntLF");
         Motor leftBack = new Motor(hardwareMap, "bckLF");
         Motor rightBack = new Motor(hardwareMap, "bckRT");
@@ -248,11 +249,11 @@ public class FC extends LinearOpMode {
         while (!isStopRequested()) {
             double loop = System.nanoTime();
 
-            if (driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance)){
+            if (driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance) || gamepad1.b){
                 PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
                 drive.driveFieldCentric(
-                        driverOp.getLeftX() * 0.7,
-                        driverOp.getLeftY() * 0.7,
+                        driverOp.getLeftX() * multiplier,
+                        driverOp.getLeftY() * multiplier,
                         driverOp.getRightX() * 0.5,
                         imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
                         false
@@ -316,6 +317,12 @@ public class FC extends LinearOpMode {
 
             if (gamepad2.right_bumper){
                 claw.setPosition(1);
+            }
+
+            if (gamepad1.a){
+                multiplier = 0.35;
+            }else{
+                multiplier = 0.7;
             }
 
             if (gamepad2.left_stick_button){

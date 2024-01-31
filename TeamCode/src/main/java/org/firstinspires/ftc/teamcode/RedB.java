@@ -53,7 +53,7 @@ public class RedB extends LinearOpMode {
         MIDDLE
     }
 
-    final double startXPos = 16.5;
+    final double startXPos = 16;
     final double startYPos = -60;
 
     public Encoder par0, par1, perp;
@@ -856,7 +856,7 @@ public class RedB extends LinearOpMode {
         // Yellow Pixel (second pixel) in cassette
         cassette.setPosition(1);
         pick();
-        strafeBot(4);
+        strafeBot(2);
         dropFirstPxl();
         dropSecondPxl();
         //setupForLoops();

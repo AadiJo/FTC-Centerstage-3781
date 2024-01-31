@@ -66,7 +66,7 @@ public class BlueA extends LinearOpMode {
         MIDDLE
     }
 
-    final double startXPos = -39.5;
+    final double startXPos = -40;
     final double startYPos = 60;
 
     PropDirection propDirectionID;
@@ -869,7 +869,7 @@ public class BlueA extends LinearOpMode {
         // Yellow Pixel (second pixel) in cassette
         cassette.setPosition(1);
         pick();
-        strafeBot(4);
+        strafeBot(2);
         dropFirstPxl();
         setupForPxlTwo();
         dropSecondPxl();
