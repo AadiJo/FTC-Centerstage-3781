@@ -454,12 +454,10 @@ public class FC extends LinearOpMode {
             }
             if (gamepad2.dpad_left){
                 door.setPosition(0);
-                sleep(300);
-                door.setPosition(0.6);
             }
-            if (gamepad2.dpad_right){
+            else if (gamepad2.dpad_right){
                 door.setPosition(0);
-                sleep(300);
+            }else{
                 door.setPosition(0.6);
             }
             if (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > -80 && imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < -100){

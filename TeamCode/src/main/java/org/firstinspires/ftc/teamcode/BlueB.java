@@ -590,10 +590,10 @@ public class BlueB extends LinearOpMode {
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
                             // Right in front of backdrop
-//                            .strafeTo(new Vector2d(38, 33))//  was -36.36, 39.6, +4
-//                            .turn(Math.toRadians(180), new TurnConstraints(10, -10, 10))
-                            .strafeTo(new Vector2d(20, 35))
-                            .strafeToLinearHeading(new Vector2d(42, 35), Math.toRadians(0))
+                            .strafeTo(new Vector2d(38, 33))//  was -36.36, 39.6, +4
+                            .turn(Math.toRadians(180), new TurnConstraints(10, -10, 10))
+//                            .strafeTo(new Vector2d(20, 35))
+//                            .strafeToLinearHeading(new Vector2d(42, 35), Math.toRadians(0))
                             .build()
             );
         }else{
