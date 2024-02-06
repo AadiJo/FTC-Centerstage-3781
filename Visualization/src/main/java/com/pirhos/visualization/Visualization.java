@@ -18,11 +18,7 @@ public class Visualization {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 17)
                 .build();
-        RoadRunnerBotEntity myBot1 = new DefaultBotBuilder(pirhos)
-                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 17)
-                .build();
-        TrajectoryActionBuilder trajectoryActionBuilder = myBot.getDrive().actionBuilder(new Pose2d(-40, -60, Math.toRadians(90)));
+        TrajectoryActionBuilder trajectoryActionBuilder = myBot.getDrive().actionBuilder(new Pose2d(16, 60, Math.toRadians(-90)));
         myBot.runAction(trajectoryActionBuilder
 //                .splineToSplineHeading(new Pose2d(35, 35, Math.toRadians(180)), Math.toRadians(180))
 //                        .splineToConstantHeading(new Vector2d(12.5, 35), Math.toRadians(0))
@@ -30,17 +26,12 @@ public class Visualization {
 //                .splineToConstantHeading(new Vector2d(20, 35), Math.toRadians(0))
 //                        .strafeToLinearHeading(new Vector2d(42, 35), Math.toRadians(0))
 
-                .strafeToLinearHeading(new Vector2d(-54, -32.5), Math.toRadians(0))
-                        .waitSeconds(0.05)
-                .strafeTo(new Vector2d(-34, -32.5))
-                .strafeToLinearHeading(new Vector2d(-40, -32.5), Math.toRadians(0))
-                .strafeToLinearHeading(new Vector2d(-52, -12.36), Math.toRadians(0))
-                .strafeTo(new Vector2d(50.73, -12.36))
-                .splineToConstantHeading(new Vector2d(39, -33.5), Math.toRadians(0))
-                        .waitSeconds(0.5)
-                .strafeTo(new Vector2d(40, -12))
-                .strafeToLinearHeading(new Vector2d(60, -12), Math.toRadians(90))
-                .strafeTo(new Vector2d(60, -12.3))
+                .strafeToLinearHeading(new Vector2d(32, 28), Math.toRadians(180))
+                .strafeTo(new Vector2d(7, 28))
+                .waitSeconds(0.1)
+                .strafeTo(new Vector2d(38, 28))
+                .strafeToLinearHeading(new Vector2d(45, 62.34), Math.toRadians(270))
+                        .strafeTo(new Vector2d(60, 62.34))
 
 
                 .build());

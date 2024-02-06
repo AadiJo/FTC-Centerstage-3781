@@ -60,7 +60,7 @@ public class RedA extends LinearOpMode {
         MIDDLE
     }
 
-    final double startXPos = -39;
+    final double startXPos = -40;
     final double startYPos = -60;
 
     PropDirection propDirectionID;
@@ -357,7 +357,7 @@ public class RedA extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 6 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 6 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 100 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 100 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 100)){
             if (position > currentArmPos){
                 moveCassetteUp();
 
@@ -525,7 +525,7 @@ public class RedA extends LinearOpMode {
             if (propDirectionID == PropDirection.LEFT){
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
-                                .strafeToLinearHeading(new Vector2d(-50, -32), Math.toRadians(0), new TranslationalVelConstraint(70))
+                                .strafeToLinearHeading(new Vector2d(-52, -32), Math.toRadians(0), new TranslationalVelConstraint(70))
                                 .build()
                 );
                 drop();
@@ -590,6 +590,7 @@ public class RedA extends LinearOpMode {
             } else if (propDirectionID == PropDirection.LEFT) {
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
+                                .strafeToLinearHeading(new Vector2d(-55.5, -32), Math.toRadians(0), new TranslationalVelConstraint(80), new ProfileAccelConstraint(- 30, 40))
                                // .strafeToLinearHeading(new Vector2d(-40, -32), Math.toRadians(0), new TranslationalVelConstraint(80), new ProfileAccelConstraint(-30, 40))
                                 //.strafeTo(new Vector2d(-40, -57), new TranslationalVelConstraint(80), new ProfileAccelConstraint(- 30, 40))
                                 .build()

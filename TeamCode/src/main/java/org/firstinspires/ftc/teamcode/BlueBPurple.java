@@ -3,15 +3,12 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
-import com.acmerobotics.roadrunner.TimeTrajectory;
-import com.acmerobotics.roadrunner.Trajectory;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.ftc.Encoder;
-import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
-import com.acmerobotics.roadrunner.ftc.RawEncoder;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -25,7 +22,6 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -39,13 +35,16 @@ import java.util.concurrent.TimeUnit;
 
 // B side is the side with the backdrop
 // One hand in from OUTSIDE SEAM on LEFT
-@Autonomous(name = "Red Backdrop")
-public class RedB extends LinearOpMode {
+@Autonomous(name = "Blue Backdrop")
+public class BlueBPurple extends LinearOpMode {
 
     OpenCvWebcam webcam = null;
+    // double targetTicks;
     private IMU imu;
 
     PropDirection propDirectionID;
+
+    TrajectoryActionBuilder trajectoryActionBuilder;
 
     enum PropDirection{
         LEFT,
@@ -54,12 +53,12 @@ public class RedB extends LinearOpMode {
     }
 
     final double startXPos = 16;
-    final double startYPos = -60;
-
-    public Encoder par0, par1, perp;
+    final double startYPos = 60;
 
     public double CST_UPPER_BOUND = 0;
     public double CST_LOWER_BOUND = 1;
+
+    public Encoder par0, par1, perp;
 
     public double ARM_START_POS;
 
@@ -67,10 +66,10 @@ public class RedB extends LinearOpMode {
 
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;
+    public boolean CST_DOWN = false;
+    public boolean CST_UP = false;
 
     DetectionPipeline pipeline;
-
-    //TrajectoryBuilder trajectoryBuilder;
 
     MecanumDrive drive;
 
@@ -78,7 +77,7 @@ public class RedB extends LinearOpMode {
 
     Servo claw, cassette, door;
 
-    double armStartPos, armDropPos, armPickPos;
+    double armTicksPerRev, armStartPos, armDropPos, armTickPerDeg, armPickPos;
     double cstUnitPerDeg, cstStartPos, cstPickPos, cstDropPos;
 
     // Orientation angles = new Orientation();
@@ -96,6 +95,7 @@ public class RedB extends LinearOpMode {
         if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
             telemetry.addData("Camera", "Waiting");
             telemetry.update();
+            // TODO optimize: see if sleep can be removed
             while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
                 sleep(20);
             }
@@ -151,8 +151,8 @@ public class RedB extends LinearOpMode {
 
     void moveCassetteDown(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() - 0.045 > CST_UPPER_BOUND){
-                cassette.setPosition(cassette.getPosition() - 0.045);
+            if (cassette.getPosition() - 0.04 > CST_UPPER_BOUND){
+                cassette.setPosition(cassette.getPosition() - 0.04);
                 sleep(100);
             }else{
                 cassette.setPosition(CST_UPPER_BOUND);
@@ -167,8 +167,8 @@ public class RedB extends LinearOpMode {
 
     void moveCassetteUp(Servo cassette){
         if (!Double.isNaN(cassette.getPosition())){
-            if (cassette.getPosition() + 0.045 < CST_LOWER_BOUND){
-                cassette.setPosition(cassette.getPosition() + 0.045);
+            if (cassette.getPosition() + 0.04 < CST_LOWER_BOUND){
+                cassette.setPosition(cassette.getPosition() + 0.04);
                 sleep(100);
             }else{
                 cassette.setPosition(CST_LOWER_BOUND);
@@ -181,10 +181,6 @@ public class RedB extends LinearOpMode {
         }
     }
     private void setArmPos(int position, DcMotorEx armMotor, Servo cassette){
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
         sleep(50);
         double tolerance = 30;
         int par0Pos = par0.getPositionAndVelocity().position;
@@ -192,41 +188,19 @@ public class RedB extends LinearOpMode {
         int perpPos = perp.getPositionAndVelocity().position;
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
-        // TODO break conditions of pushback in separate if condition
-        int currentPos = armMotor.getCurrentPosition();
-        telemetry.addData("Before loop ticks", currentPos);
-        while (Math.abs(position - currentPos) > tolerance){//&& ((Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)) &&  time1.time() < 2.5) {
+        while (armMotor.getCurrentPosition() != position && Math.abs(position - armMotor.getCurrentPosition()) > tolerance && ((Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)) &&  time1.time() < 2.5) {
+
             // obtain the encoder position
-            leftFront.setPower(0);
-            leftBack.setPower(0);
-            rightFront.setPower(0);
-            rightBack.setPower(0);
-
-            telemetry.addData("Current Pos", armMotor.getCurrentPosition());
-            telemetry.addData("Target Pos", position);
-            telemetry.update();
+            double encoderPosition = armMotor.getCurrentPosition();
             // calculate the error
-            double error = position - currentPos;
+            double error = position - encoderPosition;
             // set motor power proportional to the error
-//            if (error < 0){
-//                armMotor.setPower(-0.8);
-//            }
-//            if (error > 0){
-//                armMotor.setPower(0.8);
-//            }else{
-//                armMotor.setPower(0);
-//            }
-
-            armMotor.setPower(0.8);
-
-            if (position > currentPos){
+            armMotor.setPower(error);
+            if (position > encoderPosition){
                 moveCassetteUp(cassette);
             }else{
                 moveCassetteDown(cassette);
             }
-
-            currentPos = armMotor.getCurrentPosition();
-
 
         }
         sleep(50);
@@ -263,8 +237,8 @@ public class RedB extends LinearOpMode {
         // stopping cassette
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-    }
 
+    }
     private void moveBot(double inches){
         double inPerTick = MecanumDrive.PARAMS.inPerTick;
         int startPar0 = par0.getPositionAndVelocity().position;
@@ -429,6 +403,20 @@ public class RedB extends LinearOpMode {
         leftBack.setPower(leftBackPower);
         rightBack.setPower(rightBackPower);
     }
+    private void setupOuttakeFirstPxl(){
+        leftFront.setPower(0.3);
+        rightFront.setPower(0.3);
+        sleep(400);
+        leftFront.setPower(0);
+        rightFront.setPower(0);
+    }
+    private void resetOuttakeFirstPxl(){
+        leftFront.setPower(-0.5);
+        rightFront.setPower(-0.5);
+        sleep(400);
+        leftFront.setPower(0);
+        rightFront.setPower(0);
+    }
 
     private void pick(){
         claw.setPosition(0.8);
@@ -437,6 +425,7 @@ public class RedB extends LinearOpMode {
     private void drop(){
         claw.setPosition(0);
     }
+
 
     // PRGM STARTS HERE
 
@@ -447,7 +436,6 @@ public class RedB extends LinearOpMode {
         rightFront = hardwareMap.get(DcMotorEx.class, "frntRT");
         armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
         claw = hardwareMap.servo.get("claw");
-        cassette = hardwareMap.servo.get("cassette");
         par0 = new ThreeDeadWheelLocalizer(hardwareMap, MecanumDrive.PARAMS.inPerTick).par0;
         //par0 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftEncoder"))); // leftEncoder
         par1 = new ThreeDeadWheelLocalizer(hardwareMap, MecanumDrive.PARAMS.inPerTick).par1;
@@ -455,16 +443,28 @@ public class RedB extends LinearOpMode {
         perp = new ThreeDeadWheelLocalizer(hardwareMap, MecanumDrive.PARAMS.inPerTick).perp;
         //perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT")));
 
+        par0.setDirection(DcMotorSimple.Direction.FORWARD);
+        par1.setDirection(DcMotorSimple.Direction.REVERSE);
+        perp.setDirection(DcMotorSimple.Direction.REVERSE);
+        cassette = hardwareMap.servo.get("cassette");
+        door = hardwareMap.servo.get("door");
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        par0.setDirection(DcMotorSimple.Direction.FORWARD);
-        par1.setDirection(DcMotorSimple.Direction.REVERSE);
-        perp.setDirection(DcMotorSimple.Direction.REVERSE);
-        door = hardwareMap.servo.get("door");
-        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+
+        //trajectoryBuilder = new TrajectoryBuilder(drive.pose, 1e-6, 0.0, drive.defaultVelConstraint, drive.defaultAccelConstraint, 0.25, 0.1);
+
+//        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         cstDropPos = 50;
         armDropPos = 10;
         cstStartPos = 24;
@@ -474,10 +474,11 @@ public class RedB extends LinearOpMode {
         armPickPos = 35;
 
         imu = (IMU) hardwareMap.get("imu");
-        drive = new MecanumDrive(hardwareMap, new Pose2d(startXPos, startYPos, Math.toRadians(90)));
+        drive = new MecanumDrive(hardwareMap, new Pose2d(startXPos, startYPos, Math.toRadians(270)));
+        trajectoryActionBuilder = drive.actionBuilder(drive.pose);
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new DetectionPipeline(1);
+        pipeline = new DetectionPipeline(2);
         webcam.setPipeline(pipeline);
         FtcDashboard.getInstance().startCameraStream(webcam, 60);
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
@@ -528,45 +529,27 @@ public class RedB extends LinearOpMode {
             telemetry.update();
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
-                            //.splineTo(new Vector2d(30, 30), Math.PI / 2)
-                            //.splineTo(new Vector2d(60, 0), Math.PI)
-//                        .splineTo(new Vector2d(-36.50, -36.50), Math.toRadians(0))
-                            .strafeToLinearHeading(new Vector2d(30, -35), Math.toRadians(180), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 40))//was 24, 24// why was this + 24 if it doesnt go up in y value
-//                            .strafeTo(new Vector2d(-40, drive.pose.position.y))
-//                            .strafeTo(new Vector2d(-40, 20))
+
+                            .strafeToLinearHeading(new Vector2d(32, 28), Math.toRadians(180), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-70, 70))//was 24, 24// why was this + 24 if it doesnt go up in y value
+//                            .splineToSplineHeading(new Pose2d(35, 35, Math.toRadians(180)), Math.toRadians(180))
                             .build());
-//            Actions.runBlocking(
-//                    (Action) (trajectoryBuilder
-//                            //.splineTo(new Vector2d(30, 30), Math.PI / 2)
-//                            //.splineTo(new Vector2d(60, 0), Math.PI)
-////                        .splineTo(new Vector2d(-36.50, -36.50), Math.toRadians(0))
-//                            .strafeToLinearHeading(new Vector2d(drive.pose.position.x + 35, drive.pose.position.y + 19), Math.toRadians(-90))//was 24, 24// why was this + 24 if it doesnt go up in y value
-//                            .build()));
-
-
-
-            // turn(-90);
-
+            // TODO optimize: remove sleep
+            sleep(50);
             if (propDirectionID == PropDirection.LEFT){
-
-                Actions.runBlocking(
-                        drive.actionBuilder(drive.pose)
-                                .strafeTo(new Vector2d(7, drive.pose.position.y), new TranslationalVelConstraint(50), new ProfileAccelConstraint(-30, 40))//-7
-                                .build()
-                );
                 drop();
+                resetOuttakeFirstPxl();
 
             }
-
+//
             if (propDirectionID == PropDirection.RIGHT){
-                drop();
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
-                                .strafeTo(new Vector2d(29, drive.pose.position.y), new TranslationalVelConstraint(50), new ProfileAccelConstraint(-30, 40))
+                                .strafeTo(new Vector2d(7, drive.pose.position.y))
+//                                .splineToConstantHeading(new Vector2d(12.5, 35), Math.toRadians(0))
                                 .build()
                 );
 
-
+                drop();
             }
 
         }else if (propDirectionID == PropDirection.MIDDLE){
@@ -574,14 +557,14 @@ public class RedB extends LinearOpMode {
             telemetry.update();
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
-                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 28))
+                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y - 28), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 30))
 
                             .build()
             );
             drop();
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
-                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y - 10))
+                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 10))
 
                             .build()
             );
@@ -589,251 +572,25 @@ public class RedB extends LinearOpMode {
         }
 
     }
-    private void dropSecondPxl(){
-        try {
-            goToBackdrop(propDirectionID);
-        }catch (Exception e){
-            telemetry.addLine(e.toString());
-            telemetry.update();
-        }
 
-        sleep(50);
-        dropPxlTwo();
-
-    }
-    private void goToBackdrop(PropDirection propDirectionID){
-        drive.updatePoseEstimate();
+    void setupPark(){
         if (propDirectionID == PropDirection.LEFT || propDirectionID == PropDirection.RIGHT){
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
-                            // Right in front of backdrop
-                            //.strafeToConstantHeading(new Vector2d(-36.36, 39.6))
-                            .strafeTo(new Vector2d(38, -33))//  was -36.36, 39.6, +4
-                            .turn(Math.toRadians(180), new TurnConstraints(10, -10, 10))
-                            //.turn(Math.toRadians(180))
+                            .strafeTo(new Vector2d(38, 28))
                             .build()
             );
-        }else{
-            Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-                        // Right in front of backdrop
-                        //.strafeToConstantHeading(new Vector2d(-36.36, 39.6))
-                        .strafeToLinearHeading(new Vector2d(37, -35), Math.toRadians(0))//  was -36.36, 39.6, +4
-                        //.turn(Math.toRadians(180))
-                        .build()
-        );
-
         }
-
-        adjustPositionAprilTag();
-
-
-//        if (propDirectionID == PropDirection.MIDDLE){
-//            Actions.runBlocking(
-//                    drive.actionBuilder(drive.pose)
-//                            //.lineToXConstantHeading(-39)
-//                            .strafeToConstantHeading(new Vector2d(-44, 43))
-//                            .build()
-//            );
-//        }
-
-
-
-
-
     }
-    private void adjustPositionAprilTag(){
-        boolean targetFound     = false;    // Set to true when an AprilTag target is detected
-        double  drive_          = 0;        // Desired forward power/speed (-1 to +1)
-        double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
-        double  turn            = 0;
-        int DESIRED_TAG_ID      = 5;
-        if (propDirectionID == PropDirection.LEFT){
-            DESIRED_TAG_ID      = 4;
-        }
-
-        if (propDirectionID == PropDirection.RIGHT){
-            DESIRED_TAG_ID      = 6;
-        }
-        // Desired turning power/speed (-1 to +1)
-        double DESIRED_DISTANCE = 11.45;
-        //  this is how close the camera should get to the target (inches)
-
-        //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
-        //  applied to the drive motors to correct the error.
-        //  Drive = Error * Gain    Make these values smaller for smoother control, or larger for a more aggressive response.
-        double SPEED_GAIN  =    0.05;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
-        double STRAFE_GAIN =  0.015;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
-        double TURN_GAIN   =   0.015;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
-
-        final double MAX_AUTO_SPEED = 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_STRAFE= 0.7;   //  Clip the approach speed to this max value (adjust for your robot)
-        final double MAX_AUTO_TURN  = 0.2;
-        boolean hasMoved = false; //  Clip the turn speed to this max value (adjust for your robot)
-
-        // Initialize the April tag Detection process
-        initAprilTag();
-
-        setManualExposure(6, 250);
-
-        // Used to hold the data for a detected AprilTag
-        AprilTagDetection desiredTag = null;
-
-        ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
-        time1.reset();
-
-        while (time1.time() < 3){
-            List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-            telemetry.addData("Detections", aprilTag.getDetections());
-            for (AprilTagDetection detection : currentDetections) {
-                // Look to see if we have size info on this tag.
-                if (detection.metadata != null) {
-                    //  Check to see if we want to track towards this tag.
-                    if ((detection.id == DESIRED_TAG_ID)) {
-                        // Yes, we want to use this tag.
-                        targetFound = true;
-                        desiredTag = detection;
-                        break;  // don't look any further.
-                    } else {
-                        // This tag is in the library, but we do not want to track it right now.
-                        telemetry.addData("Skipping", "Tag ID %d is not desired", detection.id);
-                    }
-                } else {
-                    // This tag is NOT in the library, so we don't have enough information to track to it.
-                    telemetry.addData("Unknown", "Tag ID %d is not in TagLibrary", detection.id);
-                }
-            }
-
-            // Tell the driver what we see, and what to do.
-            if (targetFound) {
-                //telemetry.addData("\n>","HOLD Left-Bumper to Drive to Target\n");
-                hasMoved = true;
-                telemetry.addData("Found", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
-                telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
-                telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
-                telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
-                double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-                double  headingError    = desiredTag.ftcPose.bearing;
-                double  yawError        = desiredTag.ftcPose.yaw;
-
-                // Use the speed and turn "gains" to calculate how we want the robot to move.
-                drive_  = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-                turn   = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
-                strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
-                // Apply desired axes motions to the drivetrain.
-                moveRobot(drive_, strafe, turn);
-
-                if (Math.abs(desiredTag.ftcPose.yaw) < .5 && Math.abs(desiredTag.ftcPose.range - DESIRED_DISTANCE) < 0.2){
-                    break;
-                }
-            } else {
-                if (!hasMoved){
-                    time1.reset();
-                    if (!currentDetections.isEmpty()){
-                        if (currentDetections.get(0).id < DESIRED_TAG_ID){
-                            Actions.runBlocking(
-                                    drive.actionBuilder(drive.pose)
-                                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y - 5))
-                                            .build()
-                            );
-                        }
-                        if (currentDetections.get(0).id > DESIRED_TAG_ID){
-                            Actions.runBlocking(
-                                    drive.actionBuilder(drive.pose)
-                                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 5))
-                                            .build()
-                            );
-                        }
-                    }
-                }
-
-            }
-            telemetry.update();
-            sleep(10);
-        }
-        drive_ = 0;
-        turn   = 0;
-        strafe = 0;
-        SPEED_GAIN = 0;
-        STRAFE_GAIN = 0;
-        TURN_GAIN = 0;
-
-//        if (propDirectionID == PropDirection.RIGHT){
-//            strafeBot(-0.2);
-//        }if(propDirectionID == PropDirection.LEFT){
-//            strafeBot(0.2);
-//        }
-//        if (propDirectionID == PropDirection.MIDDLE){
-//            strafeBot(-0.6);
-//        }
-
-        if (propDirectionID == PropDirection.MIDDLE || propDirectionID == PropDirection.RIGHT){
-            strafeBot(-0.6);
-        }
-
-        //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
-        leftBack.setPower(0);
-        leftFront.setPower(0);
-        rightBack.setPower(0);
-        rightFront.setPower(0);
-
-        drive.updatePoseEstimate();
-
-
-    }
-    private void dropPxlTwo(){
-        //outtake();
-        // TODO make copy of RTP setArmPos method
-        // TODO Use RTP as backup if closed loop method fails
-        int startPos = armMotor.getCurrentPosition();
-        try{
-            OLDsetArmPos((int) startPos - ARM_BD_X_POS, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
-        }catch (Exception e){
-            telemetry.addLine(e.toString());
-            telemetry.update();
-        }
-
-//        sleep(200);
-
-        sleep(10);
-        cassette.setPosition(cassette.getPosition() + 0.1);
-        sleep(50);
-        cassette.setPosition(cassette.getPosition() + 0.1);
-        sleep(50);
-        cassette.setPosition(cassette.getPosition() + 0.05);
-        sleep(500);
-        door.setPosition(0);
-        sleep(100);
-//        // arm coming back
-//        try {
-//            OLDsetArmPos((int) startPos, armMotor, cassette);
-//        }catch (Exception e){
-//            telemetry.addLine(e.toString());
-//            telemetry.update();
-//        }
-        armMotor.setPower(1);
-        sleep(1500);
-        armMotor.setPower(0);
-        sleep(200);
-        door.setPosition(0.6);
-
-    }
-
     private void park(){
         Actions.runBlocking(
                 drive.actionBuilder(drive.pose)
-                        .strafeTo(new Vector2d(drive.pose.position.x, -58))
+                        .strafeToLinearHeading(new Vector2d(57.23, 62.34), Math.toRadians(270))
                         .build()
         );
-
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-                        .strafeToLinearHeading(new Vector2d(drive.pose.position.x + 15, drive.pose.position.y), Math.toRadians(90))
-                        .build()
-        );
-
-
     }
+
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -845,30 +602,38 @@ public class RedB extends LinearOpMode {
         telemetry.addLine("right " + pipeline.rightavgfinal);
         telemetry.addLine("middle" + pipeline.midavgfinal);
 
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         ARM_START_POS = armMotor.getCurrentPosition();
 
-
+//        final VisionPortalStreamingOpMode.CameraStreamProcessor processor = new VisionPortalStreamingOpMode.CameraStreamProcessor();
+//
+//        new VisionPortal.Builder()
+//                .addProcessor(processor)
+//                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+//                .build();
+//
+//        FtcDashboard.getInstance().startCameraStream(processor, 45);
 
         waitForStart();
         time.reset();
         imu.resetYaw();
         drive.updatePoseEstimate();
+        pick();
 
         // Purple Pixel (first pixel) on floor to be pushed
-        // Yellow Pixel (second pixel) in cassette
+        // Yellow Pixel (second pixel) in cassettex`
         cassette.setPosition(1);
-        pick();
-        strafeBot(2);
+//        pick();
+//        strafeBot(24);
+        //moveBot(-24);
+        strafeBot(-2);
+        // TODO optimize: remove sleep
+        sleep(100);
         dropFirstPxl();
-        dropSecondPxl();
-        //setupForLoops();
-        // loop till T - 5
-        //while (opModeIsActive() && time.seconds() < 25){
-        //    pickAndDropWhitePxl();
-        //}
-        // end loop
-        // setupForPark();
+        setupPark();
         park();
 
 

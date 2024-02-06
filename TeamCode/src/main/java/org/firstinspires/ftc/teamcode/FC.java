@@ -291,6 +291,10 @@ public class FC extends LinearOpMode {
                 }
 
                 if (gamepad2.left_trigger > 0.5 && gamepad2.right_trigger > 0.5){
+                    leftFront.set(0);
+                    leftBack.set(0);
+                    rightBack.set(0);
+                    rightFront.set(0);
                     //droneMotor.setPower(-VARS.droneRPM / 1620);
                     droneMotor.setVelocity(-0.85 * VARS.maxTicksPerSec);
                     gamepad2.rumble(1, 1, 200);

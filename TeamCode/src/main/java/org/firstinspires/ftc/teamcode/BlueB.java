@@ -223,7 +223,7 @@ public class BlueB extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 3.5 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 50 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 50 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 50)){
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 6 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 100 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 100 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 100)){
             if (position > currentArmPos){
                 moveCassetteUp(cassette);
 
@@ -535,7 +535,7 @@ public class BlueB extends LinearOpMode {
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
 
-                            .strafeToLinearHeading(new Vector2d(30, 35), Math.toRadians(180), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-70, 70))//was 24, 24// why was this + 24 if it doesnt go up in y value
+                            .strafeToLinearHeading(new Vector2d(32, 28), Math.toRadians(180), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-70, 70))//was 24, 24// why was this + 24 if it doesnt go up in y value
 //                            .splineToSplineHeading(new Pose2d(35, 35, Math.toRadians(180)), Math.toRadians(180))
                             .build());
             // TODO optimize: remove sleep
@@ -590,7 +590,7 @@ public class BlueB extends LinearOpMode {
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
                             // Right in front of backdrop
-                            .strafeTo(new Vector2d(38, 33))//  was -36.36, 39.6, +4
+                            .strafeTo(new Vector2d(38, 38))//  was -36.36, 39.6, +4
                             .turn(Math.toRadians(180), new TurnConstraints(10, -10, 10))
 //                            .strafeTo(new Vector2d(20, 35))
 //                            .strafeToLinearHeading(new Vector2d(42, 35), Math.toRadians(0))
@@ -601,7 +601,7 @@ public class BlueB extends LinearOpMode {
                     drive.actionBuilder(drive.pose)
                             // Right in front of backdrop
                             //.strafeToConstantHeading(new Vector2d(-36.36, 39.6))
-                            .strafeToLinearHeading(new Vector2d(37, 35), Math.toRadians(0))//  was -36.36, 39.6, +4
+                            .strafeToLinearHeading(new Vector2d(37, 38), Math.toRadians(0))//  was -36.36, 39.6, +4
                             //.turn(Math.toRadians(180))
                             .build()
             );
@@ -737,7 +737,7 @@ public class BlueB extends LinearOpMode {
         TURN_GAIN = 0;
         // TODO optimize: remove sleep
         sleep(300);
-        if (propDirectionID == PropDirection.MIDDLE){
+        if (propDirectionID == PropDirection.MIDDLE || propDirectionID == PropDirection.RIGHT){
             strafeBot(-0.6);
         }
 
@@ -780,12 +780,15 @@ public class BlueB extends LinearOpMode {
         door.setPosition(0);
         sleep(100);
 //        // arm coming back
-        try {
-            OLDsetArmPos((int) startPos, armMotor, cassette);
-        }catch (Exception e){
-            telemetry.addLine(e.toString());
-            telemetry.update();
-        }
+//        try {
+//            OLDsetArmPos((int) startPos, armMotor, cassette);
+//        }catch (Exception e){
+//            telemetry.addLine(e.toString());
+//            telemetry.update();
+//        }
+        armMotor.setPower(1);
+        sleep(1500);
+        armMotor.setPower(0);
         // TODO optimize: remove sleep
         sleep(500);
         door.setPosition(0.6);
