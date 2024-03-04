@@ -36,9 +36,12 @@ public class DetectionPipeline extends OpenCvPipeline {
         Imgproc.cvtColor(input, YCbCr, Imgproc.COLOR_RGB2YCrCb);
 
 
-        Rect leftRect = new Rect(1,1,213,359);
-        Rect rightRect = new Rect(426,1, 213, 359);
-        Rect middleRect = new Rect(213,1,213,359);
+//        Rect leftRect = new Rect(1,1,213,359);
+        Rect leftRect = new Rect(110,65,100,123);
+        Rect middleRect = new Rect(323,45,90,110);
+        Rect rightRect = new Rect(536,55, 100, 123);
+//        Rect middleRect = new Rect(213,1,213,359);
+
 
         input.copyTo(output);
         Imgproc.rectangle(output,leftRect,rectColor,1);

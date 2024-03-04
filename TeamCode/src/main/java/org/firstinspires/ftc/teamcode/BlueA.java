@@ -109,6 +109,10 @@ public class BlueA extends LinearOpMode {
 
     }
 
+    private void sleep_(long ms){
+        sleep(ms / 2);
+    }
+
     private void moveBot(double inches){
         double inPerTick = MecanumDrive.PARAMS.inPerTick;
         int startPar0 = par0.getPositionAndVelocity().position;
@@ -221,7 +225,7 @@ public class BlueA extends LinearOpMode {
                     rightBack.setPower(0);
                     rightFront.setPower(0);
                     leftBack.setPower(0);
-                    sleep(20);
+                    sleep_(20);
                     break;
 
                 }
@@ -241,7 +245,7 @@ public class BlueA extends LinearOpMode {
                     rightBack.setPower(0);
                     rightFront.setPower(0);
                     leftBack.setPower(0);
-                    sleep(20);
+                    sleep_(20);
                     break;
 
                 }
@@ -368,7 +372,7 @@ public class BlueA extends LinearOpMode {
     }
 
     private void OLDsetArmPos(int position, DcMotorEx armMotor, Servo cassette){
-        sleep(50);
+        sleep_(50);
         armMotor.setTargetPosition(position);
         armMotor.setPower(-1);
         int par0Pos = par0.getPositionAndVelocity().position;
@@ -394,7 +398,7 @@ public class BlueA extends LinearOpMode {
             telemetry.update();
         }
         armMotor.setPower(0);
-        sleep(70);
+        sleep_(70);
         // stopping cassette
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -468,7 +472,7 @@ public class BlueA extends LinearOpMode {
             telemetry.addData("Camera", "Waiting");
             telemetry.update();
             while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
-                sleep(20);
+                sleep_(20);
             }
             telemetry.addData("Camera", "Ready");
             telemetry.update();
@@ -480,13 +484,13 @@ public class BlueA extends LinearOpMode {
             ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
-                sleep(50);
+                sleep_(50);
             }
             exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
-            sleep(20);
+            sleep_(20);
             GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
             gainControl.setGain(gain);
-            sleep(20);
+            sleep_(20);
         }
     }
 
@@ -553,7 +557,7 @@ public class BlueA extends LinearOpMode {
                 );
 
                 drop();
-                sleep(50);
+                sleep_(50);
 
             }
 
@@ -732,7 +736,7 @@ public class BlueA extends LinearOpMode {
                 // Apply desired axes motions to the drivetrain.
                 moveRobot(drive_, strafe, turn);
 
-                if (Math.abs(desiredTag.ftcPose.yaw) < .5 && Math.abs(desiredTag.ftcPose.range - DESIRED_DISTANCE) < 0.2){
+                if (Math.abs(desiredTag.ftcPose.yaw) < 3 && Math.abs(desiredTag.ftcPose.range - DESIRED_DISTANCE) < 0.2){
                     break;
                 }
             } else {
@@ -758,7 +762,7 @@ public class BlueA extends LinearOpMode {
 
             }
             telemetry.update();
-            sleep(10);
+            sleep_(10);
         }
         drive_ = 0;
         turn   = 0;
@@ -766,7 +770,7 @@ public class BlueA extends LinearOpMode {
         SPEED_GAIN = 0;
         STRAFE_GAIN = 0;
         TURN_GAIN = 0;
-        sleep(300);
+        sleep_(300);
         strafeBot(-0.6);
 
         //drive.pose = new Pose2d(new Vector2d(desiredTag.ftcPose.x - desiredTag.ftcPose.range, desiredTag.ftcPose.y), Math.toRadians(0));
@@ -790,30 +794,30 @@ public class BlueA extends LinearOpMode {
             telemetry.update();
         }
 
-//        sleep(200);
+//        sleep_(200);
 
-        sleep(10);
+        sleep_(10);
         cassette.setPosition(cassette.getPosition() + 0.1);
-        sleep(50);
+        sleep_(50);
         cassette.setPosition(cassette.getPosition() + 0.1);
-        sleep(50);
+        sleep_(50);
         cassette.setPosition(cassette.getPosition() + 0.05);
-        sleep(1000);
+        sleep_(1000);
         door.setPosition(0);
-        sleep(200);
+        sleep_(200);
 //        // arm coming back
 //        try {
 //            OLDsetArmPos((int) startPos, armMotor, cassette);
-//            //sleep(200);
+//            //sleep_(200);
 //        }catch (Exception e){
 //            telemetry.addLine(e.toString());
 //            telemetry.update();
 //        }
 
         armMotor.setPower(1);
-        sleep(1500);
+        sleep_(2500);
         armMotor.setPower(0);
-        sleep(50);
+        sleep_(50);
         door.setPosition(0.6);
 
 
@@ -883,7 +887,7 @@ public class BlueA extends LinearOpMode {
         // Only one loop was possible
         //pickAndDropWhitePxl();
         //setupForPark();
-        sleep(500);
+        sleep_(500);
 //        park();
 
 

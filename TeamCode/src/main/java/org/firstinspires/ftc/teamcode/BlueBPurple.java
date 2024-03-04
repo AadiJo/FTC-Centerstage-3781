@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 // B side is the side with the backdrop
 // One hand in from OUTSIDE SEAM on LEFT
-@Autonomous(name = "Blue Backdrop")
+@Autonomous(name = "Blue Backdrop Purple")
 public class BlueBPurple extends LinearOpMode {
 
     OpenCvWebcam webcam = null;
@@ -530,7 +530,7 @@ public class BlueBPurple extends LinearOpMode {
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
 
-                            .strafeToLinearHeading(new Vector2d(32, 28), Math.toRadians(180), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-70, 70))//was 24, 24// why was this + 24 if it doesnt go up in y value
+                            .strafeToLinearHeading(new Vector2d(29.5, 28), Math.toRadians(180), new TranslationalVelConstraint(70), new ProfileAccelConstraint(-70, 70))//was 24, 24// why was this + 24 if it doesnt go up in y value
 //                            .splineToSplineHeading(new Pose2d(35, 35, Math.toRadians(180)), Math.toRadians(180))
                             .build());
             // TODO optimize: remove sleep

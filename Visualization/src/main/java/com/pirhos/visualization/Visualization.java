@@ -18,7 +18,7 @@ public class Visualization {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 17)
                 .build();
-        TrajectoryActionBuilder trajectoryActionBuilder = myBot.getDrive().actionBuilder(new Pose2d(16, 60, Math.toRadians(-90)));
+        TrajectoryActionBuilder trajectoryActionBuilder = myBot.getDrive().actionBuilder(new Pose2d(-40, -60, Math.toRadians(90)));
         myBot.runAction(trajectoryActionBuilder
 //                .splineToSplineHeading(new Pose2d(35, 35, Math.toRadians(180)), Math.toRadians(180))
 //                        .splineToConstantHeading(new Vector2d(12.5, 35), Math.toRadians(0))
@@ -26,13 +26,14 @@ public class Visualization {
 //                .splineToConstantHeading(new Vector2d(20, 35), Math.toRadians(0))
 //                        .strafeToLinearHeading(new Vector2d(42, 35), Math.toRadians(0))
 
-                .strafeToLinearHeading(new Vector2d(32, 28), Math.toRadians(180))
-                .strafeTo(new Vector2d(7, 28))
-                .waitSeconds(0.1)
-                .strafeTo(new Vector2d(38, 28))
-                .strafeToLinearHeading(new Vector2d(45, 62.34), Math.toRadians(270))
-                        .strafeTo(new Vector2d(60, 62.34))
-
+                        .strafeTo(new Vector2d(-35, -35))
+                .strafeTo(new Vector2d(-35, -40))
+                        .setTangent(Math.toRadians(180))
+                        .splineToLinearHeading(new Pose2d(-47, -10, Math.toRadians(0)), Math.toRadians(0))
+//                        .splineToConstantHeading(new Vector2d(-18, -10), Math.toRadians(0))
+//                .splineToConstantHeading(new Vector2d(8, -14), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(28, -16), Math.toRadians(0))
+                        .splineToConstantHeading(new Vector2d(47, -38), Math.toRadians(0))
 
                 .build());
 

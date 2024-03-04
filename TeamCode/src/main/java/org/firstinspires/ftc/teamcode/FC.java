@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.ftc.Encoder;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -15,8 +17,13 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @TeleOp(name = "TeleOP", group = "Current")
 public class FC extends LinearOpMode {
@@ -170,6 +177,26 @@ public class FC extends LinearOpMode {
         double targetHeading = Math.toRadians(0);
         double tolerance = 0.001;
         double multiplier = 0.7;
+
+        double angleRateOfChange = 0.0;
+        double lastAngle = 0.0;
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
+        OpenCvCamera webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        FtcDashboard.getInstance().startCameraStream(webcam, 60);
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                webcam.startStreaming(640, 360, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            public void onError(int n) {
+
+            }
+
+        });
+
         Motor leftFront = new Motor(hardwareMap, "frntLF");
         Motor leftBack = new Motor(hardwareMap, "bckLF");
         Motor rightBack = new Motor(hardwareMap, "bckRT");
@@ -228,7 +255,7 @@ public class FC extends LinearOpMode {
         IMU imu = (IMU) hardwareMap.get("imu");
         imu.initialize(parameters);
         imu.resetYaw();
-
+        ElapsedTime IMU_TIMER = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
 
         // the extended gamepad object
         GamepadEx driverOp = new GamepadEx(gamepad1);
@@ -243,22 +270,28 @@ public class FC extends LinearOpMode {
         );
 
         waitForStart();
-
+        IMU_TIMER.reset();
         cassette.setPosition(1);
-
         while (!isStopRequested()) {
             double loop = System.nanoTime();
+
 
             if (driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance) || gamepad1.b){
                 PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
                 drive.driveFieldCentric(
-                        driverOp.getLeftX() * multiplier,
-                        driverOp.getLeftY() * multiplier,
-                        driverOp.getRightX() * 0.5,
+                        driverOp.getLeftX(),
+                        driverOp.getLeftY(),
+                        driverOp.getRightX() * 0.55,
                         imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
                         false
                 );
-                targetHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                // movement of inertia = 0.0951078743
+                if (imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate > 0){
+                    targetHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) + (0.0981078743 * (imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate*imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
+
+                }else{
+                    targetHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) - (0.0981078743 * (imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate*imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
+                }
             }else{ // if no input from right joystick
                 drive.driveFieldCentric(
                         driverOp.getLeftX(),
@@ -268,17 +301,18 @@ public class FC extends LinearOpMode {
                         false
                 );
             }
+            telemetry.addData("hz", 1000000000  / (loop - loopTime));
+            telemetry.addData("Heading", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+//            log("Cassette", cassette.getPosition());
+//            log("Arm Ticks", armMotor.getCurrentPosition());
+//            log("Cassette Pos", cassette.getPosition());
+//            log("Par 0", leftEncoder.getPositionAndVelocity().position);
+//            log("Par 1", rightEncoder.getPositionAndVelocity().position);
+//            log("Perp", frontEncoder.getPositionAndVelocity().position);
 
-            log("Heading", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
-            log("Cassette", cassette.getPosition());
-            log("Arm Ticks", armMotor.getCurrentPosition());
-            log("Cassette Pos", cassette.getPosition());
-            log("Par 0", leftEncoder.getPositionAndVelocity().position);
-            log("Par 1", rightEncoder.getPositionAndVelocity().position);
-            log("Perp", frontEncoder.getPositionAndVelocity().position);
-//            telemetry.addData("hz", 1000000000  / (loop - loopTime));
             loopTime = loop;
-            telemetry.addData("Last Error", VARS.lastError);
+            telemetry.addData("Angular Velocity", imu.getRobotAngularVelocity(AngleUnit.DEGREES).zRotationRate + " degrees per second");
+            telemetry.addData("Last PID Error", VARS.lastError);
             telemetry.update();
 
             {
@@ -519,10 +553,10 @@ public class FC extends LinearOpMode {
                     if (!Double.isNaN(cassette.getPosition())){
                         if (cassette.getPosition() - 0.04 > VARS.CST_UPPER_BOUND){
                             if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
-                                if (cassette.getPosition() > 0.35){
+                                if (cassette.getPosition() > 0.4){
                                     cassette.setPosition(cassette.getPosition() - 0.04);
                                 }else{
-                                    cassette.setPosition(0.3);
+                                    cassette.setPosition(0.4);
                                 }
 
                             }else{
@@ -589,7 +623,7 @@ public class FC extends LinearOpMode {
                 }
 
             }
-            powerCassette(cassette);
+            // powerCassette(cassette);
 
             if (!Double.isNaN(door.getPosition())){
                 door.setPosition(door.getPosition());

@@ -85,6 +85,7 @@ public class RedB extends LinearOpMode {
 
     // UTIL FUNCTIONS
 
+
     private void setManualExposure(int exposureMS, int gain) {
         // Wait for the camera to be open, then use the controls
 
@@ -97,7 +98,7 @@ public class RedB extends LinearOpMode {
             telemetry.addData("Camera", "Waiting");
             telemetry.update();
             while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
-                sleep(20);
+                sleep_(20);
             }
             telemetry.addData("Camera", "Ready");
             telemetry.update();
@@ -109,14 +110,18 @@ public class RedB extends LinearOpMode {
             ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
-                sleep(50);
+                sleep_(50);
             }
             exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
-            sleep(20);
+            sleep_(20);
             GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
             gainControl.setGain(gain);
-            sleep(20);
+            sleep_(20);
         }
+    }
+
+    private void sleep_(long ms){
+        sleep(ms / 2);
     }
 
     private void initAprilTag() {
@@ -185,7 +190,7 @@ public class RedB extends LinearOpMode {
         leftBack.setPower(0);
         rightFront.setPower(0);
         rightBack.setPower(0);
-        sleep(50);
+        sleep_(50);
         double tolerance = 30;
         int par0Pos = par0.getPositionAndVelocity().position;
         int par1Pos = par1.getPositionAndVelocity().position;
@@ -229,11 +234,11 @@ public class RedB extends LinearOpMode {
 
 
         }
-        sleep(50);
+        sleep_(50);
     }
 
     private void OLDsetArmPos(int position, DcMotorEx armMotor, Servo cassette){
-        sleep(50);
+        sleep_(50);
         armMotor.setTargetPosition(position);
         armMotor.setPower(-1);
         int par0Pos = par0.getPositionAndVelocity().position;
@@ -259,7 +264,7 @@ public class RedB extends LinearOpMode {
             telemetry.update();
         }
         armMotor.setPower(0);
-        sleep(70);
+        sleep_(70);
         // stopping cassette
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -377,7 +382,7 @@ public class RedB extends LinearOpMode {
                     rightBack.setPower(0);
                     rightFront.setPower(0);
                     leftBack.setPower(0);
-                    //sleep(5);
+                    //sleep_(5);
 
                 }
                 currPosition = perp.getPositionAndVelocity().position;
@@ -396,7 +401,7 @@ public class RedB extends LinearOpMode {
                     rightBack.setPower(0);
                     rightFront.setPower(0);
                     leftBack.setPower(0);
-                    //sleep(20);
+                    //sleep_(20);
 
                 }
                 currPosition = perp.getPositionAndVelocity().position;
@@ -597,7 +602,7 @@ public class RedB extends LinearOpMode {
             telemetry.update();
         }
 
-        sleep(50);
+        sleep_(50);
         dropPxlTwo();
 
     }
@@ -723,7 +728,7 @@ public class RedB extends LinearOpMode {
                 // Apply desired axes motions to the drivetrain.
                 moveRobot(drive_, strafe, turn);
 
-                if (Math.abs(desiredTag.ftcPose.yaw) < .5 && Math.abs(desiredTag.ftcPose.range - DESIRED_DISTANCE) < 0.2){
+                if (Math.abs(desiredTag.ftcPose.yaw) < 3 && Math.abs(desiredTag.ftcPose.range - DESIRED_DISTANCE) < 0.2){
                     break;
                 }
             } else {
@@ -749,7 +754,7 @@ public class RedB extends LinearOpMode {
 
             }
             telemetry.update();
-            sleep(10);
+            sleep_(10);
         }
         drive_ = 0;
         turn   = 0;
@@ -793,17 +798,17 @@ public class RedB extends LinearOpMode {
             telemetry.update();
         }
 
-//        sleep(200);
+//        sleep_(200);
 
-        sleep(10);
+        sleep_(10);
         cassette.setPosition(cassette.getPosition() + 0.1);
-        sleep(50);
+        sleep_(50);
         cassette.setPosition(cassette.getPosition() + 0.1);
-        sleep(50);
+        sleep_(50);
         cassette.setPosition(cassette.getPosition() + 0.05);
-        sleep(500);
+        sleep_(500);
         door.setPosition(0);
-        sleep(100);
+        sleep_(100);
 //        // arm coming back
 //        try {
 //            OLDsetArmPos((int) startPos, armMotor, cassette);
@@ -812,9 +817,9 @@ public class RedB extends LinearOpMode {
 //            telemetry.update();
 //        }
         armMotor.setPower(1);
-        sleep(1500);
+        sleep_(2500);
         armMotor.setPower(0);
-        sleep(200);
+        sleep_(200);
         door.setPosition(0.6);
 
     }

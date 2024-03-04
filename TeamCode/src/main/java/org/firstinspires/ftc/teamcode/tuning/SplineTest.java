@@ -1,20 +1,26 @@
 package org.firstinspires.ftc.teamcode.tuning;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.TurnConstraints;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.TankDrive;
-@Disabled
+@Autonomous(name = "Spline Test")
 public final class SplineTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose2d beginPose = new Pose2d(-0.14, -48.00, Math.toRadians(0.00));
+        Pose2d beginPose = new Pose2d(-40, -60, Math.toRadians(90.00));
         if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
             MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
 
@@ -24,14 +30,14 @@ public final class SplineTest extends LinearOpMode {
                 drive.actionBuilder(beginPose)
 //                        .splineTo(new Vector2d(30, 30), Math.PI / 2)
 //                        .splineTo(new Vector2d(0, 60), Math.PI)
-                        .splineTo(new Vector2d(23.29, -19.31), Math.toRadians(90.00))
-                        .splineTo(new Vector2d(-0.57, -2.27), Math.toRadians(180.00))
-                        .splineTo(new Vector2d(-31.95, 21.73), Math.toRadians(90.00))
-                        .splineTo(new Vector2d(0.14, 48.71), Math.toRadians(0.00))
-                        .splineTo(new Vector2d(19.31, -5.96), Math.toRadians(270.00))
-                        .splineTo(new Vector2d(-1.28, -47.86), Math.toRadians(177.71))
-                        .waitSeconds(0.1)
-                        .turn(Math.toRadians(180), new TurnConstraints(2, -2, 2))
+                        .strafeTo(new Vector2d(-60, -22))
+                        .strafeTo(new Vector2d(-40, -22))
+                        .strafeTo(new Vector2d(-40, -31.5))
+                        .strafeTo(new Vector2d(-40, -40), new TranslationalVelConstraint(20), new ProfileAccelConstraint(-40, 20))
+                        .setTangent(Math.toRadians(180))
+                        .splineToLinearHeading(new Pose2d(-47, -11.5, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-60, 50))
+                        .splineToConstantHeading(new Vector2d(28, -20), Math.toRadians(0))
+                        .splineToConstantHeading(new Vector2d(40, -45), Math.toRadians(0))
                         .build());
         } else if (TuningOpModes.DRIVE_CLASS.equals(TankDrive.class)) {
             TankDrive drive = new TankDrive(hardwareMap, beginPose);
