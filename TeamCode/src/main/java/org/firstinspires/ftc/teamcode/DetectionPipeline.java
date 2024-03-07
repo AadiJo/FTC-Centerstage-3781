@@ -37,9 +37,9 @@ public class DetectionPipeline extends OpenCvPipeline {
 
 
 //        Rect leftRect = new Rect(1,1,213,359);
-        Rect leftRect = new Rect(110,65,100,123);
-        Rect middleRect = new Rect(323,45,90,110);
-        Rect rightRect = new Rect(536,55, 100, 123);
+        Rect leftRect = new Rect(125,65,100,123);
+        Rect middleRect = new Rect(338,45,90,110);
+        Rect rightRect = new Rect(539,55, 90, 123);
 //        Rect middleRect = new Rect(213,1,213,359);
 
 

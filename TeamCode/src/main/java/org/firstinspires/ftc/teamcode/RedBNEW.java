@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 // A Side is opposite to backdrop
-@Autonomous(name = "Red Audience")
-public class RedA extends LinearOpMode {
+@Autonomous(name = "Red Backdrop Testing")
+public class RedBNEW extends LinearOpMode {
 
     OpenCvWebcam webcam = null;
     private Servo claw;
@@ -83,7 +83,7 @@ public class RedA extends LinearOpMode {
         TEAM
     }
 
-    final double startXPos = -40;
+    final double startXPos = 16;
     final double startYPos = -60;
 
     PropDirection propDirectionID;
@@ -1031,22 +1031,33 @@ public class RedA extends LinearOpMode {
 
         // Purple Pixel (first pixel) on floor to be pushed
         // Yellow Pixel (second pixel) in cassette
+        propDirectionID = PropDirection.RIGHT;
         pick();
-        findTeamProp();
 
-        sleep((long) delay * 1000);
-        dropPurplePixel(propDirectionID);
+        Actions.runBlocking(
+                drive.actionBuilder(drive.pose)
+                        .splineToConstantHeading(new Vector2d(23.00, -39), Math.toRadians(90.00))
+                        .stopAndAdd(telemetryPacket -> {
+                            drop();
+                            return false;
+                        })
+                        .setTangent(Math.toRadians(-90))
+                        .splineToConstantHeading(new Vector2d(39.00, -42), Math.toRadians(90))
+                        .splineToSplineHeading(new Pose2d(42.00, -36.78, Math.toRadians(0.00)), Math.toRadians(180.00), null, new ProfileAccelConstraint(-20, 20))
+                        .build()
+        );
 
-        goToBackdrop();
+        readAprilTags();
+        dropYellowPixel();
 
-        if (willDropYellow){
-            readAprilTags();
-            dropYellowPixel();
-//            sleep(1000);
-        }
-        if (willPark){
-            park();
-        }
+
+        Actions.runBlocking(
+                drive.actionBuilder(drive.pose)
+                        .setTangent(Math.toRadians(-90))
+                        .splineToConstantHeading(new Vector2d(48.85, -56.50), Math.toRadians(0.00))
+                        .splineToSplineHeading(new Pose2d(60.00, -57.94, Math.toRadians(90.00)), Math.toRadians(90.00), null, new ProfileAccelConstraint(-20, 20))
+                        .build()
+        );
 
 
 
