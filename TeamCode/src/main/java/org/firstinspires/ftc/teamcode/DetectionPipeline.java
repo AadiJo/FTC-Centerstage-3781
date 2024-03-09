@@ -12,6 +12,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 public class DetectionPipeline extends OpenCvPipeline {
 
     int ColorToExtract;
+    int StartPos;
     int position;
     Mat YCbCr = new Mat();
     Mat leftCrop;
@@ -25,9 +26,9 @@ public class DetectionPipeline extends OpenCvPipeline {
     Scalar rectColor =  new Scalar(225,0,0,50); //225, 0, 0
     //    OpenCvPipeline examplePipeline;
 
-    public DetectionPipeline(int R1B2){
-
+    public DetectionPipeline(int R1B2, int A1B2){
         ColorToExtract = R1B2;
+        StartPos = A1B2;
     }
 
     @Override
@@ -35,12 +36,33 @@ public class DetectionPipeline extends OpenCvPipeline {
 
         Imgproc.cvtColor(input, YCbCr, Imgproc.COLOR_RGB2YCrCb);
 
-
-//        Rect leftRect = new Rect(1,1,213,359);
         Rect leftRect = new Rect(125,65,100,123);
         Rect middleRect = new Rect(338,45,90,110);
         Rect rightRect = new Rect(539,55, 90, 123);
-//        Rect middleRect = new Rect(213,1,213,359);
+
+        if (ColorToExtract == 1){
+            if (StartPos == 2){
+                leftRect = new Rect(0,65,100,123);
+                middleRect = new Rect(228,45,90,110);
+                rightRect = new Rect(439,55, 90, 123);
+            }
+        }
+
+        if (ColorToExtract == 2){
+            if (StartPos == 2){
+                leftRect = new Rect(125,65,100,123);
+                middleRect = new Rect(328,45,90,110);
+                rightRect = new Rect(539,55, 90, 123);
+            }
+
+            if (StartPos == 1){
+                leftRect = new Rect(0,65,100,123);
+                middleRect = new Rect(228,45,90,110);
+                rightRect = new Rect(439,55, 90, 123);
+            }
+        }
+
+
 
 
         input.copyTo(output);

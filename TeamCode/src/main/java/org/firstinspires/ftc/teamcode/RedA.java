@@ -467,7 +467,7 @@ public class RedA extends LinearOpMode {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         // TODO switch to red
-        pipeline = new DetectionPipeline(1);
+        pipeline = new DetectionPipeline(1, 1);
         webcam.setPipeline(pipeline);
         viewWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         FtcDashboard.getInstance().startCameraStream(webcam, 60);
@@ -546,9 +546,9 @@ public class RedA extends LinearOpMode {
                     drive.actionBuilder(drive.pose)
 //                            .strafeTo(new Vector2d(-56, -30.5), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-60, 50))
 //                            .strafeTo(new Vector2d(-40, -30.5))
-                            .strafeTo(new Vector2d(-60, -22))
-                            .strafeTo(new Vector2d(-40, -22))
-                            .strafeTo(new Vector2d(-40, -31.5))
+                            .splineToConstantHeading(new Vector2d(-50.70, -30.11), Math.toRadians(90.00))
+                            .splineToConstantHeading(new Vector2d(-40.00, -31.50), Math.toRadians(90.00))
+
                             .stopAndAdd(new Action() {
                                 @Override
                                 public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -564,8 +564,9 @@ public class RedA extends LinearOpMode {
         if (propDirectionID == PropDirection.RIGHT){
             Actions.runBlocking(
                     drive.actionBuilder(drive.pose)
-                            .strafeTo(new Vector2d(-40, -55))
-                            .strafeToLinearHeading(new Vector2d(-32, -31.95), Math.toRadians(0))
+                            .splineToConstantHeading(new Vector2d(-40.00, -53.40), Math.toRadians(90.00))
+                            .splineToSplineHeading(new Pose2d(-32.00, -31.95, Math.toRadians(0.00)), Math.toRadians(0.00))
+
                             .stopAndAdd(new Action() {
                                 @Override
                                 public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -598,7 +599,7 @@ public class RedA extends LinearOpMode {
             if (gateLocation == GateLocation.TEAM){
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
-                                .strafeTo(new Vector2d(-47.43, -38.20))
+                                .splineToConstantHeading(new Vector2d(-47.43, -40.19), Math.toRadians(90.00))
                                 .stopAndAdd(new Action() {
                                     @Override
                                     public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -607,7 +608,9 @@ public class RedA extends LinearOpMode {
                                     }
                                 })
 
-                                .strafeTo(new Vector2d(-38.06, -49.99))
+                                .setTangent(Math.toRadians(-90))
+                                .splineToConstantHeading(new Vector2d(-43.17, -50.56), Math.toRadians(90.00))
+
                                 .build()
                 );
             }

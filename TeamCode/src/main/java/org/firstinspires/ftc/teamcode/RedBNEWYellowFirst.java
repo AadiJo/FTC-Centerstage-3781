@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
@@ -8,7 +9,6 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.ftc.Encoder;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
@@ -33,17 +34,25 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 // A Side is opposite to backdrop
-@Disabled
-@Autonomous(name = "Red Audience OLD")
-public class RedAOLD extends LinearOpMode {
+@Autonomous(name = "Red Backdrop Testing Yellow")
+public class RedBNEWYellowFirst extends LinearOpMode {
 
     OpenCvWebcam webcam = null;
     private Servo claw;
     private Servo cassette;
     private Servo door;
+    private double delay = 0;
+    private ParkLocation parkLocation = ParkLocation.AWAY;
+
+    private GateLocation gateLocation = GateLocation.MIDDLE;
+    private boolean willDropYellow = true;
+    private boolean willPark = true;
+
     private IMU imu;
 
     public Encoder par0, par1, perp;
+
+    Telemetry dashboardTelemetry;
 
     public double CST_UPPER_BOUND = 0;
     public double CST_LOWER_BOUND = 1;
@@ -60,12 +69,23 @@ public class RedAOLD extends LinearOpMode {
         MIDDLE
     }
 
-    final double startXPos = -40;
+    enum ParkLocation{
+        CLOSE,
+        AWAY
+    }
+
+    enum GateLocation{
+        MIDDLE,
+        TEAM
+    }
+
+    final double startXPos = 16;
     final double startYPos = -60;
 
     PropDirection propDirectionID;
 
     DetectionPipeline pipeline;
+    OpenCvCamera viewWebcam;
 
     MecanumDrive drive;
 
@@ -361,7 +381,7 @@ public class RedAOLD extends LinearOpMode {
         ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         time1.reset();
         int currentArmPos = armMotor.getCurrentPosition();
-        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 6 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 100 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 100 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 100)){
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 6 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 60 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 60 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 60)){
             if (position > currentArmPos){
                 moveCassetteUp();
 
@@ -382,6 +402,27 @@ public class RedAOLD extends LinearOpMode {
 
     }
 
+    private void DUMBsetArmPos(int position, DcMotorEx armMotor, Servo cassette){
+        int currentArmPos = armMotor.getCurrentPosition();
+        int par0Pos = par0.getPositionAndVelocity().position;
+        int par1Pos = par1.getPositionAndVelocity().position;
+        int perpPos = perp.getPositionAndVelocity().position;
+        ElapsedTime time1 = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+        time1.reset();
+        while ((armMotor.isBusy() || armMotor.getCurrentPosition() != position) && time1.time() < 6 && (Math.abs(par0Pos - par0.getPositionAndVelocity().position) < 100 && Math.abs(par1Pos - par1.getPositionAndVelocity().position) < 100 && Math.abs(perpPos - perp.getPositionAndVelocity().position) < 100)){
+            if (position > currentArmPos){
+                armMotor.setPower(1);
+                moveCassetteUp();
+
+            }else{
+                armMotor.setPower(-1);
+                moveCassetteDown();
+
+            }
+        }
+        armMotor.setPower(0);
+    }
+
     private void initialize(){
         leftFront = hardwareMap.get(DcMotorEx.class, "frntLF");
         leftBack = hardwareMap.get(DcMotorEx.class, "bckLF");
@@ -394,7 +435,7 @@ public class RedAOLD extends LinearOpMode {
         // par1 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntLF"))); // frntLF
         perp = new ThreeDeadWheelLocalizer(hardwareMap, MecanumDrive.PARAMS.inPerTick).perp;
         //perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT")));
-
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         par0.setDirection(DcMotorSimple.Direction.FORWARD);
         par1.setDirection(DcMotorSimple.Direction.REVERSE);
         perp.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -421,9 +462,12 @@ public class RedAOLD extends LinearOpMode {
         drive = new MecanumDrive(hardwareMap, new Pose2d(startXPos, startYPos, Math.toRadians(90)));
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new DetectionPipeline(1, 1);
+        // TODO switch to red
+        pipeline = new DetectionPipeline(1, 2);
         webcam.setPipeline(pipeline);
+        viewWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         FtcDashboard.getInstance().startCameraStream(webcam, 60);
+        dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
@@ -449,7 +493,7 @@ public class RedAOLD extends LinearOpMode {
             telemetry.addData("Camera", "Waiting");
             telemetry.update();
             while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
-                sleep_(20);
+                //sleep_(20);
             }
             telemetry.addData("Camera", "Ready");
             telemetry.update();
@@ -461,24 +505,16 @@ public class RedAOLD extends LinearOpMode {
             ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
-                sleep_(50);
+                //sleep_(50);
             }
             exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
-            sleep_(20);
+            //sleep_(20);
             GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
             gainControl.setGain(gain);
-            sleep_(20);
+            //sleep_(20);
         }
     }
 
-    private void dropFirstPxl() throws InterruptedException {
-        findTeamProp();
-        telemetry.addData("PropDirectionID", propDirectionID);
-        telemetry.update();
-        telemetry.addData("Heading", drive.pose.heading);
-        dropPxlOne(propDirectionID);
-
-    }
     private void findTeamProp(){
         final int propNumID = pipeline.position;
         if (propNumID == 1){
@@ -490,7 +526,7 @@ public class RedAOLD extends LinearOpMode {
         }
     }
 
-    private void dropPxlOne(PropDirection propDirectionID) throws InterruptedException {
+    private void dropPurplePixel(PropDirection propDirectionID) throws InterruptedException {
         // Find team prop happens BEFORE function is called
         telemetry.addData("Heading", drive.pose.heading);
         telemetry.update();
@@ -501,146 +537,56 @@ public class RedAOLD extends LinearOpMode {
         telemetry.addData("DIRECTION", propDirectionID);
         telemetry.update();
 
-        if (propDirectionID == PropDirection.LEFT || propDirectionID == PropDirection.RIGHT){
-            telemetry.addData("DIRECTION", propDirectionID);
-            telemetry.update();
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            //.splineTo(new Vector2d(30, 30), Math.PI / 2)
-                            //.splineTo(new Vector2d(60, 0), Math.PI)
-//                        .splineTo(new Vector2d(-36.50, -36.50), Math.toRadians(0))
-                            .strafeToLinearHeading(new Vector2d(-54, -32), Math.toRadians(0), new TranslationalVelConstraint(70))//was 24, 24// why was this + 24 if it doesnt go up in y value
-//                            .strafeTo(new Vector2d(-40, drive.pose.position.y))
-//                            .strafeTo(new Vector2d(-40, 20))
-                            .build());
-//            Actions.runBlocking(
-//                    (Action) (trajectoryBuilder
-//                            //.splineTo(new Vector2d(30, 30), Math.PI / 2)
-//                            //.splineTo(new Vector2d(60, 0), Math.PI)
-////                        .splineTo(new Vector2d(-36.50, -36.50), Math.toRadians(0))
-//                            .strafeToLinearHeading(new Vector2d(drive.pose.position.x + 35, drive.pose.position.y + 19), Math.toRadians(-90))//was 24, 24// why was this + 24 if it doesnt go up in y value
-//                            .build()));
-
-
-            drive.updatePoseEstimate();
-
-            // turn(-90);
+        if (willDropYellow){
+            if (propDirectionID == PropDirection.RIGHT){
+                Actions.runBlocking(
+                        drive.actionBuilder(drive.pose)
+                                .splineToConstantHeading(new Vector2d(23.00, -39), Math.toRadians(90.00))
+                                .stopAndAdd(telemetryPacket -> {
+                                    drop();
+                                    return false;
+                                })
+                                .setTangent(Math.toRadians(-90))
+                                .splineToConstantHeading(new Vector2d(39.00, -42), Math.toRadians(90))
+                                .splineToSplineHeading(new Pose2d(42.00, -36.78, Math.toRadians(0.00)), Math.toRadians(180.00), null, new ProfileAccelConstraint(-20, 20))
+                                .build()
+                );
+            }
 
             if (propDirectionID == PropDirection.LEFT){
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
-                                .strafeToLinearHeading(new Vector2d(-52, -32), Math.toRadians(0), new TranslationalVelConstraint(70))
+                                .splineTo(new Vector2d(9.23, -31.67), Math.toRadians(180))
+                                .stopAndAdd(telemetryPacket -> {
+                                    drop();
+                                    return false;
+                                })
+                                .splineToConstantHeading(new Vector2d(23.00, -31.67), Math.toRadians(180.00))
+                                .splineToSplineHeading(new Pose2d(42.00, -36.78, Math.toRadians(0.00)), Math.toRadians(180.00), null, new ProfileAccelConstraint(-20, 20))
                                 .build()
                 );
-                drop();
             }
 
-            if (propDirectionID == PropDirection.RIGHT){
+            if (propDirectionID == PropDirection.MIDDLE){
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
-                                .strafeTo(new Vector2d(-28, drive.pose.position.y))//-7
+                                .splineTo(new Vector2d(30.00, -25.00), Math.toRadians(90.00))
+                                .splineToConstantHeading(new Vector2d(13.00, -30.50), Math.toRadians(90.00))
+                                .stopAndAdd(telemetryPacket -> {
+                                    drop();
+                                    return false;
+                                })
+                                .setTangent(Math.toRadians(-90))
+                                .splineToConstantHeading(new Vector2d(27, -35.93), Math.toRadians(90.00))
+                                .splineToSplineHeading(new Pose2d(42.00, -36.78, Math.toRadians(0.00)), Math.toRadians(180.00), null, new ProfileAccelConstraint(-20, 20))
                                 .build()
                 );
-
-                drop();
-                sleep_(50);
-
             }
-
-//            if (propDirectionID == PropDirection.LEFT){
-//                drive.updatePoseEstimate();
-//                Actions.runBlocking(
-//                        drive.actionBuilder(drive.pose)
-////                                .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 2))
-////                                .lineToX(drive.pose.position.x + 3, new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 30))
-//                                //.strafeTo(new Vector2d(drive.pose.position.x, -56))
-//                                .build()
-//                );
-
-//                drop();
-//            }
-
-        }else if (propDirectionID == PropDirection.MIDDLE){
-            telemetry.addData("DIRECTION", propDirectionID);
-            telemetry.update();
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y + 28))
-
-                            .build()
-            );
-            drop();
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            .strafeTo(new Vector2d(drive.pose.position.x, drive.pose.position.y - 5))
-
-                            .build()
-            );
-
         }
 
     }
 
-    private void setupForPxlTwo(){
-
-        {
-            if (propDirectionID == PropDirection.MIDDLE) {
-                Actions.runBlocking(
-                        drive.actionBuilder(drive.pose)
-                                .strafeToLinearHeading(new Vector2d(-54, -32), Math.toRadians(0), new TranslationalVelConstraint(80), new ProfileAccelConstraint(-30, 40))
-                                //.strafeTo(new Vector2d(-40, -57), new TranslationalVelConstraint(80), new ProfileAccelConstraint(- 30, 40))
-                                .build()
-                );
-            } else if (propDirectionID == PropDirection.LEFT) {
-                Actions.runBlocking(
-                        drive.actionBuilder(drive.pose)
-                                .strafeToLinearHeading(new Vector2d(-55.5, -32), Math.toRadians(0), new TranslationalVelConstraint(80), new ProfileAccelConstraint(- 30, 40))
-                               // .strafeToLinearHeading(new Vector2d(-40, -32), Math.toRadians(0), new TranslationalVelConstraint(80), new ProfileAccelConstraint(-30, 40))
-                                //.strafeTo(new Vector2d(-40, -57), new TranslationalVelConstraint(80), new ProfileAccelConstraint(- 30, 40))
-                                .build()
-                );
-            } else {
-                Actions.runBlocking(
-                        drive.actionBuilder(drive.pose)
-                                .strafeToLinearHeading(new Vector2d(-54, -32), Math.toRadians(0), new TranslationalVelConstraint(80), new ProfileAccelConstraint(-30, 40))
-                                //.strafeTo(new Vector2d(-40, -57), new TranslationalVelConstraint(80), new ProfileAccelConstraint(- 30, 40))
-                                .build()
-                );
-            }
-
-
-            drive.updatePoseEstimate();
-
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-                            .strafeToLinearHeading(new Vector2d(-51, -12.36), Math.toRadians(5), new TranslationalVelConstraint(80), new ProfileAccelConstraint(-30, 35))
-
-                            .build()
-            );
-
-            drive.updatePoseEstimate();
-
-            Actions.runBlocking(
-                    drive.actionBuilder(drive.pose)
-//                            .strafeTo(new Vector2d(36, drive.pose.position.y), new TranslationalVelConstraint(90) , new ProfileAccelConstraint(-30, 50))
-//                            .strafeTo(new Vector2d(39, 34), new TranslationalVelConstraint(40))
-                            .splineTo(new Vector2d(-24.28, -12.51), Math.toRadians(0))
-                            .splineTo(new Vector2d(16.90, -13.50), Math.toRadians(0))
-                            //.splineTo(new Vector2d(31.10, 17.89), Math.toRadians(0))
-                            .strafeTo(new Vector2d(50.73, -17.50), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 50))
-                            .strafeTo(new Vector2d(44.73, -45.51), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 50))
-                            .strafeTo(new Vector2d(38.73, -45.51), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-30, 70))
-                            .build()
-            );
-
-        }
-
-    }
-    private void dropSecondPxl(){
-        goToBackdrop();
-        dropPxlTwo();
-    }
-    private void goToBackdrop(){
+    private void readAprilTags(){
         boolean targetFound     = false;    // Set to true when an AprilTag target is detected
         double  drive_          = 0;        // Desired forward power/speed (-1 to +1)
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
@@ -721,7 +667,7 @@ public class RedAOLD extends LinearOpMode {
                 // Apply desired axes motions to the drivetrain.
                 moveRobot(drive_, strafe, turn);
 
-                if (Math.abs(desiredTag.ftcPose.yaw) < 3 && Math.abs(desiredTag.ftcPose.range - DESIRED_DISTANCE) < 0.2){
+                if (Math.abs(desiredTag.ftcPose.yaw) < 3 && Math.abs(desiredTag.ftcPose.range - DESIRED_DISTANCE) < 1){
                     break;
                 }
             } else {
@@ -781,17 +727,16 @@ public class RedAOLD extends LinearOpMode {
         drive.updatePoseEstimate();
 
     }
-    private void dropPxlTwo(){
+    private void dropYellowPixel(){
         //outtake();
         int startPos = armMotor.getCurrentPosition();
+        sleep(50);
         try{
-            OLDsetArmPos((int) startPos - ARM_BD_X_POS, armMotor, cassette); // was ARM_BD_L3_POS but want to change to 2 or 1
+            DUMBsetArmPos((int) startPos - ARM_BD_X_POS, armMotor, cassette);
         }catch (Exception e){
             telemetry.addLine(e.toString());
             telemetry.update();
         }
-
-//        sleep_(200);
 
         sleep_(10);
         cassette.setPosition(cassette.getPosition() + 0.1);
@@ -799,16 +744,9 @@ public class RedAOLD extends LinearOpMode {
         cassette.setPosition(cassette.getPosition() + 0.1);
         sleep_(50);
         cassette.setPosition(cassette.getPosition() + 0.05);
-        sleep_(1000);
+        sleep_(500);
         door.setPosition(0);
-        sleep_(100);
-//        // arm coming back
-//        try {
-//            OLDsetArmPos((int) startPos, armMotor, cassette);
-//        }catch (Exception e){
-//            telemetry.addLine(e.toString());
-//            telemetry.update();
-//        }
+        sleep_(200);
         armMotor.setPower(1);
         sleep_(2500);
         armMotor.setPower(0);
@@ -818,16 +756,55 @@ public class RedAOLD extends LinearOpMode {
 
     }
     private void park(){
-        drive.updatePoseEstimate();
-        Actions.runBlocking(
-                drive.actionBuilder(drive.pose)
-                        .strafeTo(new Vector2d(drive.pose.position.x, -20.5))
-                        .strafeToLinearHeading(new Vector2d(60, -17.8), Math.toRadians(90))
-                        //.strafeToLinearHeading(new Vector2d(drive.pose.position.x, drive.pose.position.y - 8), Math.toRadians(90))
-                        //.strafeToConstantHeading(new Vector2d(startXPos + 100, startYPos + 100))
-                        .build()
+        if (parkLocation == ParkLocation.AWAY){
+            if (gateLocation == GateLocation.MIDDLE){
+                if (propDirectionID == PropDirection.LEFT){
+                    Actions.runBlocking(
+                            drive.actionBuilder(drive.pose)
+                                    .strafeTo(new Vector2d(drive.pose.position.x, -25))
+                                    .strafeToLinearHeading(new Vector2d(60, -23), Math.toRadians(90))
+                                    .build()
+                    );
+                }else{
+                    Actions.runBlocking(
+                            drive.actionBuilder(drive.pose)
+                                    .strafeTo(new Vector2d(drive.pose.position.x, -17))
+                                    .strafeToLinearHeading(new Vector2d(60, -17), Math.toRadians(90))
+                                    .build()
+                    );
+                }
 
-        );
+            }
+
+            if (gateLocation == GateLocation.TEAM){
+                if (willDropYellow){
+                    Actions.runBlocking(
+                            drive.actionBuilder(drive.pose)
+                                    .strafeTo(new Vector2d(drive.pose.position.x, -12))
+                                    .strafeToLinearHeading(new Vector2d(60, -12), Math.toRadians(90))
+                                    .build()
+                    );
+                }
+                if (!willDropYellow){
+                    Actions.runBlocking(
+                            drive.actionBuilder(drive.pose)
+                                    .strafeTo(new Vector2d(drive.pose.position.x, -12))
+                                    .strafeToLinearHeading(new Vector2d(60, -12), Math.toRadians(90))
+                                    .build()
+                    );
+                }
+            }
+
+        }
+
+        if (parkLocation == ParkLocation.CLOSE){
+            Actions.runBlocking(
+                    drive.actionBuilder(drive.pose)
+                            .strafeTo(new Vector2d(drive.pose.position.x, -61))
+                            .strafeToLinearHeading(new Vector2d(60, -67), Math.toRadians(90))
+                            .build()
+            );
+        }
 
 
     }
@@ -836,51 +813,102 @@ public class RedAOLD extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         ElapsedTime time = new ElapsedTime();
-
         initialize();
 
         claw = hardwareMap.servo.get("claw");
-
-        telemetry.addLine("left " + pipeline.leftavgfinal);
-        telemetry.addLine("right " + pipeline.rightavgfinal);
-        telemetry.addLine("middle" + pipeline.midavgfinal);
-
-        final double l_turn = Math.toRadians(90); // Due to turning error, making manual adjustment
-        final double r_turn = Math.toRadians(270);
-
-        telemetry.addData("L Turn", l_turn);
-        telemetry.addData("Turn Error", Math.abs(Math.toRadians(90) - l_turn));
-        telemetry.update();
-
         ARM_START_POS = armMotor.getCurrentPosition();
+        cassette.setPosition(1);
+        while (opModeInInit()){
+            telemetry.addLine("Xbox Buttons");
+            telemetry.addLine("");
+            telemetry.addLine(" A / B           - Add / Remove Delay");
+            if (willPark){
+                telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+            }
+            telemetry.addLine("  BACK         - Toggle Yellow Pixel Drop");
+            //telemetry.addLine("Press A to add delay, Press B to remove delay");
+            telemetry.addLine("");
+            telemetry.addLine("Current Delay: " + delay);
+            //telemetry.addLine("Press DPAD-UP for away parking, Press DPAD-DOWN for close parking");
+            if (willPark){
+                if (parkLocation == ParkLocation.AWAY){
+                    telemetry.addLine("");
+                    telemetry.addLine("Parking is AWAY");
+                }
+                if (parkLocation == ParkLocation.CLOSE){
+                    telemetry.addLine("");
+                    telemetry.addLine("Parking is CLOSE");
+                }
+            }
+            //telemetry.addLine("Press DPAD-LEFT for going through middle gate, Press DPAD-RIGHT for going through red gate");
 
-        waitForStart();
+            if (willDropYellow){
+                telemetry.addLine("");
+                telemetry.addLine("WILL drop Yellow Pixel");
+            }
+            if (!willDropYellow){
+                telemetry.addLine("");
+                telemetry.addLine("WILL NOT drop Yellow Pixel");
+                telemetry.addLine("");
+            }
+            telemetry.addLine("");
+            telemetry.update();
+            dashboardTelemetry.update();
+
+            if (willDropYellow){
+                willPark = true;
+            }
+
+            if (gamepad1.a){
+                if (delay < 5){
+                    delay += 0.5;
+                }
+            }
+            if (gamepad1.b){
+                if (delay > 0){
+                    delay -= 0.5;
+                }
+            }
+            if (gamepad1.dpad_up){
+                parkLocation = ParkLocation.AWAY;
+            }
+            if (gamepad1.dpad_down){
+                parkLocation = ParkLocation.CLOSE;
+            }
+
+            if (gamepad1.back){
+                willDropYellow = !willDropYellow;
+            }
+
+            sleep(70);
+        }
+
         time.reset();
         imu.resetYaw();
         drive.updatePoseEstimate();
 
         // Purple Pixel (first pixel) on floor to be pushed
         // Yellow Pixel (second pixel) in cassette
-        cassette.setPosition(1);
+        propDirectionID = PropDirection.LEFT;
         pick();
-        strafeBot(-2);
-        dropFirstPxl();
-        setupForPxlTwo();
-        dropSecondPxl();
-        // setupForLoops();
-        // loop till T - 5
-//        while (opModeIsActive() && time.seconds() < 25){
-//            pickAndDropWhitePxl();
-//        }
-        // end loop
+//        goToBackdrop();
 
-        // Only one loop was possible
-        //pickAndDropWhitePxl();
-        //setupForPark();
-//        park();
+        if (willDropYellow){
+            readAprilTags();
+            dropYellowPixel();
+        }
+
+        dropPurplePixel(propDirectionID);
+
+        Actions.runBlocking(
+                drive.actionBuilder(drive.pose)
+                        .setTangent(Math.toRadians(-90))
+                        .splineToConstantHeading(new Vector2d(48.85, -56.50), Math.toRadians(0.00))
+                        .splineToSplineHeading(new Pose2d(61.50, -57.94, Math.toRadians(90.00)), Math.toRadians(90.00), null, new ProfileAccelConstraint(-20, 20))
+                        .build()
+        );
 
 
-        //dropSecondPxl(drive, startXPos, startYPos, l_turn, r_turn);
 
 
     }

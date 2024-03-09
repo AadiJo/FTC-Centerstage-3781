@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-@TeleOp(name = "Pull Testing")
+@TeleOp(name = "Hang Controls")
 public class PullTesting extends LinearOpMode {
 
     DcMotorEx armMotor;
@@ -29,6 +29,13 @@ public class PullTesting extends LinearOpMode {
             if (isStopRequested()){
                 return;
             }
+
+            telemetry.addLine("Xbox Buttons");
+            telemetry.addLine("");
+            telemetry.addLine(" X           - Wind Hang Motor");
+            telemetry.addLine(" B           - Unwind Hang Motor");
+            telemetry.addLine(" Y           - Arm Forward");
+            telemetry.addLine(" A           - Arm Backward");
 
             if (gamepad1.dpad_up){
                 if (armMotorPower < 1){

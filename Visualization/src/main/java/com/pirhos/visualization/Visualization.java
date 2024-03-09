@@ -18,27 +18,26 @@ public class Visualization {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 17)
                 .build();
-        TrajectoryActionBuilder trajectoryActionBuilder = myBot.getDrive().actionBuilder(new Pose2d(16, -60, Math.toRadians(90)));
+        TrajectoryActionBuilder trajectoryActionBuilder = myBot.getDrive().actionBuilder(new Pose2d(-40, 60, Math.toRadians(-90)));
         myBot.runAction(trajectoryActionBuilder
-                .splineToConstantHeading(new Vector2d(23.00, -37.35), Math.toRadians(90.00))
-                        .waitSeconds(0.2)
-                        .setTangent(Math.toRadians(-90))
-//                .splineToConstantHeading(new Vector2d(31.38, -57.80), Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(39.00, -42), Math.toRadians(90))
-//                .splineToSplineHeading(new Pose2d(35.08, -53.82, Math.toRadians(31.22)), Math.toRadians(31.22))
-//                .splineToConstantHeading(new Vector2d(38.91, -37.35), Math.toRadians(90.00))
-//                        .splineToConstantHeading(new Vector2d(36.07, -48.00), Math.toRadians(90.00))
-                        .splineToSplineHeading(new Pose2d(42.00, -36.78, Math.toRadians(0.00)), Math.toRadians(180.00))
-                        .waitSeconds(1)
+                .splineToConstantHeading(new Vector2d(-40.00, 53.40), Math.toRadians(270.00))
+                .splineToSplineHeading(new Pose2d(-32.00, 31.95, Math.toRadians(0.00)), Math.toRadians(0.00))
                 .setTangent(Math.toRadians(180))
-                .splineToConstantHeading(new Vector2d(48.85, -56.50), Math.toRadians(0.00))
-                .splineToSplineHeading(new Pose2d(60.00, -57.94, Math.toRadians(90.00)), Math.toRadians(90.00))
+                .splineToLinearHeading(new Pose2d(-47, 11.5, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-60, 50))
+                .splineToConstantHeading(new Vector2d(28, 20), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(40, 45), Math.toRadians(0))
+                .strafeTo(new Vector2d(40, 17))
+                        .strafeToLinearHeading(new Vector2d(60, 17), Math.toRadians(-90))
 
-//                // park close
-//                        .setTangent(Math.toRadians(180))
-//                .splineToConstantHeading(new Vector2d(48.85, -56.00), Math.toRadians(0.00))
-//                .splineToSplineHeading(new Pose2d(60.00, -57.94, Math.toRadians(90.00)), Math.toRadians(90.00))
-                .build()                );
+
+
+
+
+
+
+
+
+                        .build());
 
         pirhos.setBackground(MeepMeep.Background.FIELD_CENTERSTAGE_JUICE_DARK)
                 .setDarkMode(true)

@@ -10,6 +10,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.ftc.Encoder;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 // B side is the side with the backdrop
 // One hand in from OUTSIDE SEAM on LEFT
+@Disabled
 @Autonomous(name = "Blue Backdrop Purple")
 public class BlueBPurple extends LinearOpMode {
 
@@ -478,7 +480,7 @@ public class BlueBPurple extends LinearOpMode {
         trajectoryActionBuilder = drive.actionBuilder(drive.pose);
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new DetectionPipeline(2);
+        pipeline = new DetectionPipeline(2, 2);
         webcam.setPipeline(pipeline);
         FtcDashboard.getInstance().startCameraStream(webcam, 60);
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {

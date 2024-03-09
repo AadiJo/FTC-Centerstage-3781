@@ -275,7 +275,6 @@ public class FC extends LinearOpMode {
         while (!isStopRequested()) {
             double loop = System.nanoTime();
 
-
             if (driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance) || gamepad1.b){
                 PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
                 drive.driveFieldCentric(
@@ -321,7 +320,7 @@ public class FC extends LinearOpMode {
                     imu.initialize(parameters);
                     imu.resetYaw();
                     targetHeading = Math.toRadians(0);
-                    gamepad1.rumble(1, 1, 200);
+                    gamepad1.rumble(10, 10, 200);
                 }
 
                 if (gamepad2.left_trigger > 0.5 && gamepad2.right_trigger > 0.5){
