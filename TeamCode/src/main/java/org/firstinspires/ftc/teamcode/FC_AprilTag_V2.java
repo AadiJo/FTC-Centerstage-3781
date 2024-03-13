@@ -545,6 +545,19 @@ public class FC_AprilTag_V2 extends LinearOpMode {
 
                 }
 
+                moveRobot(0,0,0);
+
+                while(leftEncoder.getPositionAndVelocity().velocity < 100){
+                    armMotor.setPower(-.7);
+                    moveCassetteDown(cassette);
+                }
+
+                door.setPosition(0);
+                sleep(1000);
+                door.setPosition(.6);
+
+
+
 
                 //while (leftEncoder.getPositionAndVelocity().velocity < );
             }
