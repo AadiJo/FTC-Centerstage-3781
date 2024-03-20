@@ -49,7 +49,8 @@ public class BlueA extends LinearOpMode {
     private Servo door;
     private IMU imu;
 
-    public Encoder par0, par1, perp;
+    public Encoder par0, par1,
+            perp;
 
     public double CST_UPPER_BOUND = 0;
     public double CST_LOWER_BOUND = 1;
@@ -106,6 +107,7 @@ public class BlueA extends LinearOpMode {
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTag)
                 .build();
+
 
     }
 
@@ -416,6 +418,7 @@ public class BlueA extends LinearOpMode {
         par1 = new ThreeDeadWheelLocalizer(hardwareMap, MecanumDrive.PARAMS.inPerTick).par1;
         // par1 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntLF"))); // frntLF
         perp = new ThreeDeadWheelLocalizer(hardwareMap, MecanumDrive.PARAMS.inPerTick).perp;
+
         //perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT")));
 
         par0.setDirection(DcMotorSimple.Direction.FORWARD);

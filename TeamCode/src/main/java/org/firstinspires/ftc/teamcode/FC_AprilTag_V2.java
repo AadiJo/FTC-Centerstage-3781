@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.hardware.rev.RevSPARKMini;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -47,6 +48,10 @@ public class FC_AprilTag_V2 extends LinearOpMode {
     Motor leftFront, leftBack, rightBack, rightFront;
 
     boolean ATDONE = false;
+
+    double strafeAmount = 0;
+
+    Encoder frontEncoder;
 
     double DESIRED_DISTANCE = 10.5; //  this is how close the camera should get to the target (inches)
 
@@ -159,6 +164,55 @@ public class FC_AprilTag_V2 extends LinearOpMode {
         rightFront.set(-rightFrontPower);
         leftBack.set(leftBackPower);
         rightBack.set(-rightBackPower);
+    }
+
+
+    private void strafeBot(double inches){
+        double inPerTick = org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick;
+        //double lateralInPerTick = MecanumDrive.PARAMS.lateralInPerTick;
+        double startPerp = frontEncoder.getPositionAndVelocity().position;
+        double targetTicks = Math.abs(inches) * (1/inPerTick);
+        //double targetTicks = Math.abs(inches) * (1/lateralInPerTick);
+
+        if (inches > 0){// strafe left
+            leftFront.set(-0.38);//-
+            rightBack.set(-0.2);//-
+            rightFront.set(0.2);
+            leftBack.set(0.2);
+            float currPosition = frontEncoder.getPositionAndVelocity().position;
+            while (currPosition < (startPerp + targetTicks)){
+                if (currPosition >= (startPerp + targetTicks)){
+                    leftFront.set(0);
+                    rightBack.set(0);
+                    rightFront.set(0);
+                    leftBack.set(0);
+                    sleep(20);
+                    break;
+
+                }
+                currPosition = frontEncoder.getPositionAndVelocity().position;
+            }
+        }
+
+        if (inches < 0){ // strafe right
+            leftFront.set(0.38);//+
+            rightBack.set(0.2);//+
+            rightFront.set(-0.2);
+            leftBack.set(-0.2);
+            float currPosition = frontEncoder.getPositionAndVelocity().position;
+            while (currPosition > (startPerp - targetTicks)){
+                if (currPosition <= (startPerp - targetTicks)){
+                    leftFront.set(0);
+                    rightBack.set(0);
+                    rightFront.set(0);
+                    leftBack.set(0);
+                    sleep(20);
+                    break;
+
+                }
+                currPosition = frontEncoder.getPositionAndVelocity().position;
+            }
+        }
     }
     private void initAprilTag() {
         // Create the AprilTag processor by using a builder.
@@ -312,7 +366,7 @@ public class FC_AprilTag_V2 extends LinearOpMode {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
         OpenCvCamera webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FtcDashboard.getInstance().startCameraStream(webcam, 60);
+        //FtcDashboard.getInstance().startCameraStream(webcam, 60);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
@@ -334,7 +388,7 @@ public class FC_AprilTag_V2 extends LinearOpMode {
         //par0 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftEncoder"))); // leftEncoder
         Encoder rightEncoder = new ThreeDeadWheelLocalizer(hardwareMap, org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick).par1;
         // par1 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntLF"))); // frntLF
-        Encoder frontEncoder = new ThreeDeadWheelLocalizer(hardwareMap, org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick).perp;
+        frontEncoder = new ThreeDeadWheelLocalizer(hardwareMap, org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick).perp;
         //perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT")));OverflowEncoder frontEncoder = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT")));
 
         boolean targetFound     = false;    // Set to true when an AprilTag target is detected
@@ -342,7 +396,7 @@ public class FC_AprilTag_V2 extends LinearOpMode {
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
         double  turn            = 0;
 
-
+        frontEncoder.setDirection(DcMotorSimple.Direction.REVERSE);
         initAprilTag();
 
         setManualExposure(6, 250);
@@ -420,12 +474,12 @@ public class FC_AprilTag_V2 extends LinearOpMode {
             targetFound = false;
             desiredTag  = null;
 
-            if(gamepad1.a)
-                DESIRED_DISTANCE = 5.0;
-            if(gamepad1.y)
-                DESIRED_DISTANCE = 7;
             if(gamepad1.b)
-                DESIRED_DISTANCE = 10.5;
+                DESIRED_DISTANCE = 3.7;
+            if(gamepad1.y)
+                DESIRED_DISTANCE = 5;//7
+            if(gamepad1.x)
+                DESIRED_DISTANCE = 9.7;
 
             if(gamepad1.dpad_left && gamepad1.right_bumper) {
                 DESIRED_TAG_ID = 4;
@@ -472,6 +526,12 @@ public class FC_AprilTag_V2 extends LinearOpMode {
                 telemetry.update();
 
             }
+
+            if(gamepad1.right_trigger > .3)
+                strafeAmount = -1.5;
+
+            if(gamepad1.left_trigger > .3)
+                strafeAmount = 1.5;
 
 
 
@@ -547,10 +607,32 @@ public class FC_AprilTag_V2 extends LinearOpMode {
 
                 moveRobot(0,0,0);
 
-                while(leftEncoder.getPositionAndVelocity().velocity < 100){
-                    armMotor.setPower(-.7);
+                aprilTagTime.reset();
+
+                telemetry.clearAll();
+                telemetry.addLine("I have just stopped");
+                telemetry.update();
+
+              if(DESIRED_DISTANCE != 5)
+                    strafeBot(strafeAmount);
+
+                strafeBot(-.6);
+
+
+
+                int prevPose = leftEncoder.getPositionAndVelocity().position;
+
+
+                while(Math.abs(prevPose - leftEncoder.getPositionAndVelocity().position) < 500 ){
+                    armMotor.setPower(-1);
                     moveCassetteDown(cassette);
+                    sleep(50);
+                    telemetry.addLine("Arm Pos:  "+armMotor.getCurrentPosition() +"\n + "+leftEncoder.getPositionAndVelocity().position);
+                    telemetry.update();
                 }
+
+                armMotor.setPower(0);
+                sleep(500);
 
                 door.setPosition(0);
                 sleep(1000);
@@ -615,10 +697,6 @@ public class FC_AprilTag_V2 extends LinearOpMode {
             loopTime = loop;
             //telemetry.addData("Angular Velocity", imu.getRobotAngularVelocity(AngleUnit.DEGREES).zRotationRate + " degrees per second");
             //telemetry.addData("Last PID Error", VARS.lastError);
-            telemetry.clearAll();
-            telemetry.addLine(leftEncoder.getPositionAndVelocity().velocity+"");
-
-            telemetry.update();
 
             {
 

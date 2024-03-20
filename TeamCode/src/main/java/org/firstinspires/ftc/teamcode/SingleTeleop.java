@@ -42,8 +42,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name = "TeleOP using April Tags 1", group = "Current")
-public class FC_AprilTag extends LinearOpMode {
+@TeleOp(name = "TeleOP using April Tags for One person", group = "Current")
+public class SingleTeleop extends LinearOpMode {
     //level 3 is 9 inches (range not des dist)
     // level 1 is 13.5 inches
     //level 2 is 10 inches
@@ -327,10 +327,10 @@ public class FC_AprilTag extends LinearOpMode {
 
         });
 
-         leftFront = new Motor(hardwareMap, "frntLF");
-         leftBack = new Motor(hardwareMap, "bckLF");
-         rightBack = new Motor(hardwareMap, "bckRT");
-         rightFront = new Motor(hardwareMap, "frntRT");
+        leftFront = new Motor(hardwareMap, "frntLF");
+        leftBack = new Motor(hardwareMap, "bckLF");
+        rightBack = new Motor(hardwareMap, "bckRT");
+        rightFront = new Motor(hardwareMap, "frntRT");
         Encoder leftEncoder = new ThreeDeadWheelLocalizer(hardwareMap, org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick).par0;
         //par0 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftEncoder"))); // leftEncoder
         Encoder rightEncoder = new ThreeDeadWheelLocalizer(hardwareMap, org.firstinspires.ftc.teamcode.MecanumDrive.PARAMS.inPerTick).par1;
@@ -479,7 +479,7 @@ public class FC_AprilTag extends LinearOpMode {
 
             // Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-            if(!isStopRequested())
+
             for (AprilTagDetection detection : currentDetections) {
                 // Look to see if we have size info on this tag.
                 if (detection.metadata != null) {
@@ -553,25 +553,7 @@ public class FC_AprilTag extends LinearOpMode {
             sleep(10);
 
             if(!gamepad1.left_bumper) {
-                if ((driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance) || gamepad1.b) && gamepad1.a) {
-                    PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
-                    drive.driveFieldCentric(
-                            driverOp.getLeftX()*.2,
-                            driverOp.getLeftY()*.2,
-                            driverOp.getRightX() * 0.55,
-                            imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES),   // gyro value passed in here must be in degrees
-                            false
-                    );
-                    // movement of inertia = 0.0951078743
-                    if (imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate > 0) {
-                        targetHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) + (0.0981078743 * (imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate * imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
-
-                    } else {
-                        targetHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) - (0.0981078743 * (imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate * imu.getRobotAngularVelocity(AngleUnit.RADIANS).zRotationRate));
-                    }
-                }
-
-                else if (driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance) || gamepad1.b) {
+                if (driverOp.getRightX() != 0 || (Math.abs(VARS.lastError) <= tolerance) || gamepad1.b) {
                     PIDControl(targetHeading, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
                     drive.driveFieldCentric(
                             driverOp.getLeftX(),
@@ -620,14 +602,14 @@ public class FC_AprilTag extends LinearOpMode {
                     gamepad1.rumble(1, 1, 200);
                 }
 
-                if (gamepad2.left_trigger > 0.5 && gamepad2.right_trigger > 0.5){
+                if (gamepad1.left_trigger > 0.5 && gamepad1.right_trigger > 0.5){
                     leftFront.set(0);
                     leftBack.set(0);
                     rightBack.set(0);
                     rightFront.set(0);
                     //droneMotor.setPower(-VARS.droneRPM / 1620);
                     droneMotor.setVelocity(-0.85 * VARS.maxTicksPerSec);
-                    gamepad2.rumble(1, 1, 200);
+                    gamepad1.rumble(1, 1, 200);
                     telemetry.addLine("Drone Percent:" + droneMotor.getVelocity()/ VARS.maxTicksPerSec+"");
                     telemetry.update();
                     sleep(1000);
@@ -644,12 +626,12 @@ public class FC_AprilTag extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.left_bumper) {
+            if (gamepad1.left_bumper) {
                 claw.setPosition(0);
 
             }
 
-            if (gamepad2.right_bumper){
+            if (gamepad1.right_bumper){
                 claw.setPosition(1);
             }
 
@@ -659,10 +641,10 @@ public class FC_AprilTag extends LinearOpMode {
                 multiplier = 0.7;
             }
 
-            if (gamepad2.left_stick_button){
+            if (gamepad1.left_stick_button){
 
 
-                if (gamepad2.x){
+                if (gamepad1.x){
                     // FIRST
                     //cassette.setPosition(VARS.CST_BD_L1_POS);
                     setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L1_POS, armMotor, cassette,leftEncoder, rightEncoder, frontEncoder);
@@ -670,19 +652,19 @@ public class FC_AprilTag extends LinearOpMode {
 
                 }
 
-                if (gamepad2.y){
+                if (gamepad1.y){
                     // SECOND
                     //cassette.setPosition(VARS.CST_BD_L2_POS);
                     setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L2_POS, armMotor, cassette,leftEncoder, rightEncoder, frontEncoder);
                 }
 
-                if (gamepad2.b){
+                if (gamepad1.b){
                     // THIRD
                     //cassette.setPosition(VARS.CST_BD_L3_POS);
                     setArmPos((int) VARS.ARM_START_POS - VARS.ARM_BD_L3_POS, armMotor, cassette,leftEncoder, rightEncoder, frontEncoder);
                 }
 
-                if (gamepad2.a){
+                if (gamepad1.a){
                     // START
                     //cassette.setPosition(0.8);
                     setArmPos((int) VARS.ARM_START_POS, armMotor, cassette,leftEncoder, rightEncoder, frontEncoder);
@@ -691,7 +673,7 @@ public class FC_AprilTag extends LinearOpMode {
 
             }
 
-            if (gamepad2.right_stick_button){
+            if (gamepad1.right_stick_button){
                 if (VARS.intake){
                     intake_L.setPower(0);
                     intake_R.setPower(0);
@@ -725,7 +707,7 @@ public class FC_AprilTag extends LinearOpMode {
                 pullMotor.setPower(0);
             }
 
-            if (gamepad2.y) {
+            if (gamepad1.y) {
                 // UP
                 // opposite to arm
                 if (armMotor.getCurrentPosition() > (VARS.ARM_START_POS - 6166)){
@@ -734,16 +716,16 @@ public class FC_AprilTag extends LinearOpMode {
                     powerCassette(cassette);
                 }
 
-            }else if (!gamepad2.a){
+            }else if (!gamepad1.a){
                 VARS.t0 = 0;
                 VARS.CST_DOWN = false;
                 armMotor.setPower(0);
                 powerCassette(cassette);
             }
 
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 // DOWN
-                if (!gamepad2.back){
+                if (!gamepad1.back){
                     if (armMotor.getCurrentPosition() < VARS.ARM_START_POS){
                         // opposite to arm
                         VARS.CST_UP = true;
@@ -759,7 +741,7 @@ public class FC_AprilTag extends LinearOpMode {
 
                     powerCassette(cassette);
                 }
-            }else if (!gamepad2.y){
+            }else if (!gamepad1.y){
                 VARS.t0 = 0;
                 VARS.CST_UP = false;
                 armMotor.setPower(0);
@@ -786,16 +768,16 @@ public class FC_AprilTag extends LinearOpMode {
 
 
             }
-            if (gamepad2.dpad_left){
+            if (gamepad1.dpad_left){
                 door.setPosition(0);
             }
-            else if (gamepad2.dpad_right){
+            else if (gamepad1.dpad_right){
                 door.setPosition(0);
             }else{
                 door.setPosition(0.6);
             }
             if (imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) > -80 && imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES) < -100){
-                if (gamepad2.x){
+                if (gamepad1.x){
                     // switch to parallel to backdrop position
                     if (!Double.isNaN(cassette.getPosition())){
                         if (cassette.getPosition() - 0.04 > VARS.CST_UPPER_BOUND){
@@ -828,7 +810,7 @@ public class FC_AprilTag extends LinearOpMode {
 
 
 
-                if (gamepad2.b){
+                if (gamepad1.b){
                     // switch to flat position
 
                     if (!Double.isNaN(cassette.getPosition())){
@@ -850,11 +832,21 @@ public class FC_AprilTag extends LinearOpMode {
 
 
             }else{
-                if (gamepad2.b){
+                if (gamepad1.b){
                     // switch to parallel to backdrop position
                     if (!Double.isNaN(cassette.getPosition())){
                         if (cassette.getPosition() - 0.04 > VARS.CST_UPPER_BOUND){
-                            cassette.setPosition(cassette.getPosition() - 0.04);
+                            if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
+                                if (cassette.getPosition() > 0.4){
+                                    cassette.setPosition(cassette.getPosition() - 0.04);
+                                }else{
+                                    cassette.setPosition(0.4);
+                                }
+
+                            }else{
+                                cassette.setPosition(cassette.getPosition() - 0.04);
+                            }
+
                             sleep(30);
                         }else{
                             cassette.setPosition(VARS.CST_UPPER_BOUND);
@@ -867,7 +859,7 @@ public class FC_AprilTag extends LinearOpMode {
 
                 }
 
-                if (gamepad2.x){
+                if (gamepad1.x){
                     // switch to flat position
 
                     if (!Double.isNaN(cassette.getPosition())){
