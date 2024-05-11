@@ -466,11 +466,8 @@ public class BlueA extends LinearOpMode {
         drive = new MecanumDrive(hardwareMap, new Pose2d(startXPos, startYPos, Math.toRadians(-90)));
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        // TODO switch to red
         pipeline = new DetectionPipeline(2, 1);
         webcam.setPipeline(pipeline);
-        viewWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FtcDashboard.getInstance().startCameraStream(webcam, 60);
         dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
@@ -483,6 +480,7 @@ public class BlueA extends LinearOpMode {
             }
 
         });
+        FtcDashboard.getInstance().startCameraStream(webcam, 60);
     }
 
     private void setManualExposure(int exposureMS, int gain) {
@@ -547,7 +545,7 @@ public class BlueA extends LinearOpMode {
 //                            .strafeTo(new Vector2d(-56, -30.5), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-60, 50))
 //                            .strafeTo(new Vector2d(-40, -30.5))
                             .splineToConstantHeading(new Vector2d(-50.70, 30.11), Math.toRadians(-90))
-                            .splineToConstantHeading(new Vector2d(-40.00, 31.50), Math.toRadians(270.00))
+                            .splineToConstantHeading(new Vector2d(-37.50, 30.50), Math.toRadians(270.00))
                             .stopAndAdd(new Action() {
                                 @Override
                                 public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -588,7 +586,7 @@ public class BlueA extends LinearOpMode {
                                 }
                             })
                             .setTangent(Math.toRadians(90))
-                            .splineToConstantHeading(new Vector2d(-34.08, 50.84), Math.toRadians(270.00))
+                            .splineToConstantHeading(new Vector2d(-37.50, 50.84), Math.toRadians(270.00))
                             .build()
             );
 
@@ -603,7 +601,7 @@ public class BlueA extends LinearOpMode {
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
                                 .setTangent(Math.toRadians(180))
-                                .splineToLinearHeading(new Pose2d(-47, 11.5, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-60, 50))
+                                .splineToLinearHeading(new Pose2d(-45.5, 11.5, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-60, 50))
 //                                .splineToLinearHeading(new Pose2d(-47, -9.5, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(60), new ProfileAccelConstraint(-60, 50))
                                 .build()
                 );
@@ -612,27 +610,47 @@ public class BlueA extends LinearOpMode {
             if (propDirectionID == PropDirection.RIGHT){
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
-                                .splineToConstantHeading(new Vector2d(-34.79, 19.74), Math.toRadians(-90.00))
-                                .splineToSplineHeading(new Pose2d(-22.50, 9.00, Math.toRadians(0.00)), Math.toRadians(0.00))
+                                .splineToConstantHeading(new Vector2d(-37.79, 19.74), Math.toRadians(-90.00))
+                                .splineToSplineHeading(new Pose2d(-22.50, 7.00, Math.toRadians(0.00)), Math.toRadians(0.00))
                                 .build()
                 );
             }
 
             if (willDropYellow){
-                Actions.runBlocking(
-                        drive.actionBuilder(drive.pose)
-                                //.splineToConstantHeading(new Vector2d(28, -17), Math.toRadians(0))
-                                .splineToConstantHeading(new Vector2d(28, 20), Math.toRadians(0))
-                                .splineToConstantHeading(new Vector2d(40, 45), Math.toRadians(0))
-                                .build()
-                );
+                if (propDirectionID == PropDirection.RIGHT){
+                    Actions.runBlocking(
+                            drive.actionBuilder(drive.pose)
+                                    //.splineToConstantHeading(new Vector2d(28, -17), Math.toRadians(0))
+                                    .splineToConstantHeading(new Vector2d(28, 11), Math.toRadians(0))
+                                    .splineToConstantHeading(new Vector2d(40, 37), Math.toRadians(0))
+                                    .build()
+                    );
+                }else{
+                    Actions.runBlocking(
+                            drive.actionBuilder(drive.pose)
+                                    //.splineToConstantHeading(new Vector2d(28, -17), Math.toRadians(0))
+                                    .splineToConstantHeading(new Vector2d(28, 17), Math.toRadians(0))
+                                    .splineToConstantHeading(new Vector2d(40, 40), Math.toRadians(0))
+                                    .build()
+                    );
+                }
+
             }
             if (!willDropYellow){
-                Actions.runBlocking(
-                        drive.actionBuilder(drive.pose)
-                                .splineToConstantHeading(new Vector2d(28, 17), Math.toRadians(0))
-                                .build()
-                );
+                if (propDirectionID == PropDirection.RIGHT){
+                    Actions.runBlocking(
+                            drive.actionBuilder(drive.pose)
+                                    .splineToConstantHeading(new Vector2d(28, 11), Math.toRadians(0))
+                                    .build()
+                    );
+                }else{
+                    Actions.runBlocking(
+                            drive.actionBuilder(drive.pose)
+                                    .splineToConstantHeading(new Vector2d(28, 17), Math.toRadians(0))
+                                    .build()
+                    );
+                }
+
             }
 
         }
@@ -687,7 +705,7 @@ public class BlueA extends LinearOpMode {
             DESIRED_TAG_ID      = 3;
         }
         // Desired turning power/speed (-1 to +1)
-        double DESIRED_DISTANCE = 10;
+        double DESIRED_DISTANCE = 8.5;
         //  this is how close the camera should get to the target (inches)
 
         //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
@@ -843,34 +861,54 @@ public class BlueA extends LinearOpMode {
 
     }
     private void park(){
+        drive.updatePoseEstimate();
         if (parkLocation == ParkLocation.AWAY){
             if (gateLocation == GateLocation.MIDDLE){
-                if (propDirectionID == PropDirection.RIGHT){
+                if (willDropYellow){
                     Actions.runBlocking(
                             drive.actionBuilder(drive.pose)
-                                    .strafeTo(new Vector2d(drive.pose.position.x, 25))
-                                    .strafeToLinearHeading(new Vector2d(60, 23), Math.toRadians(-90))
+                                    .strafeTo(new Vector2d(drive.pose.position.x, 15))
+                                    .strafeToLinearHeading(new Vector2d(drive.pose.position.x, 11.5), Math.toRadians(-90))
                                     .build()
                     );
                 }else{
-                    Actions.runBlocking(
-                            drive.actionBuilder(drive.pose)
-                                    .strafeTo(new Vector2d(drive.pose.position.x, 17))
-                                    .strafeToLinearHeading(new Vector2d(60, 17), Math.toRadians(-90))
-                                    .build()
-                    );
+                    if (propDirectionID == PropDirection.RIGHT){
+                        Actions.runBlocking(
+                                drive.actionBuilder(drive.pose)
+                                        .strafeToLinearHeading(new Vector2d(50, 7), Math.toRadians(-90))
+                                        .build()
+                        );
+                    }else{
+                        Actions.runBlocking(
+                                drive.actionBuilder(drive.pose)
+                                        .strafeToLinearHeading(new Vector2d(52, 11), Math.toRadians(-90))
+                                        .build()
+                        );
+                    }
+
                 }
+
 
             }
 
             if (gateLocation == GateLocation.TEAM){
                 if (willDropYellow){
-                    Actions.runBlocking(
-                            drive.actionBuilder(drive.pose)
-                                    .strafeTo(new Vector2d(drive.pose.position.x, 12))
-                                    .strafeToLinearHeading(new Vector2d(60, 12), Math.toRadians(-90))
-                                    .build()
-                    );
+                    if (propDirectionID == PropDirection.RIGHT){
+                        Actions.runBlocking(
+                                drive.actionBuilder(drive.pose)
+                                        .strafeTo(new Vector2d(drive.pose.position.x, 12))
+                                        .strafeToLinearHeading(new Vector2d(60, 12), Math.toRadians(-90))
+                                        .build()
+                        );
+                    }else{
+                        Actions.runBlocking(
+                                drive.actionBuilder(drive.pose)
+                                        .strafeTo(new Vector2d(drive.pose.position.x, 8.0))
+                                        .strafeToLinearHeading(new Vector2d(60, 6.0), Math.toRadians(-90))
+                                        .build()
+                        );
+                    }
+
                 }
                 if (!willDropYellow){
                     Actions.runBlocking(
@@ -906,17 +944,32 @@ public class BlueA extends LinearOpMode {
         ARM_START_POS = armMotor.getCurrentPosition();
         cassette.setPosition(1);
         while (opModeInInit()){
-            telemetry.addLine("Xbox Buttons");
-            telemetry.addLine("");
-            telemetry.addLine(" A / B           - Add / Remove Delay");
-            if (!willDropYellow){
-                telemetry.addLine(" Y / X         - Will / Will Not Park");
+            if (gamepad1.getGamepadId() == 11 || gamepad1.getGamepadId() == 1006 || gamepad1.getGamepadId() == 1009){
+                telemetry.addLine("Xbox Buttons");
+                telemetry.addLine("");
+                telemetry.addLine(" A / B           - Add / Remove Delay");
+                if (!willDropYellow){
+                    telemetry.addLine(" Y / X         - Will / Will Not Park");
+                }
+                if (willPark){
+                    telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+                    telemetry.addLine("← / →         - Middle / Blue Truss");
+                }
+                telemetry.addLine("  BACK         - Toggle Yellow Pixel Drop");
+            }else{
+                telemetry.addLine("PS Buttons");
+                telemetry.addLine("");
+                telemetry.addLine(" X / O           - Add / Remove Delay");
+                if (!willDropYellow){
+                    telemetry.addLine(" △ / □         - Will / Will Not Park");
+                }
+                if (willPark){
+                    telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+                    telemetry.addLine("← / →         - Middle / Blue Truss");
+                }
+                telemetry.addLine(" SHARE         - Toggle Yellow Pixel Drop");
             }
-            if (willPark){
-                telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
-                telemetry.addLine("← / →         - Middle / Red Truss");
-            }
-            telemetry.addLine("  BACK         - Toggle Yellow Pixel Drop");
+
             //telemetry.addLine("Press A to add delay, Press B to remove delay");
             telemetry.addLine("");
             telemetry.addLine("Current Delay: " + delay);

@@ -392,8 +392,6 @@ public class RedB extends LinearOpMode {
         // TODO switch to red
         pipeline = new DetectionPipeline(1, 2);
         webcam.setPipeline(pipeline);
-        viewWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FtcDashboard.getInstance().startCameraStream(webcam, 60);
         dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
@@ -406,6 +404,7 @@ public class RedB extends LinearOpMode {
             }
 
         });
+        FtcDashboard.getInstance().startCameraStream(webcam, 60);
     }
 
     private void setManualExposure(int exposureMS, int gain) {
@@ -769,13 +768,23 @@ public class RedB extends LinearOpMode {
         ARM_START_POS = armMotor.getCurrentPosition();
         cassette.setPosition(1);
         while (opModeInInit()){
-            telemetry.addLine("Xbox Buttons");
-            telemetry.addLine("");
-            telemetry.addLine(" A / B           - Add / Remove Delay");
-            if (willPark){
-                telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+            if (gamepad1.getGamepadId() == 11 || gamepad1.getGamepadId() == 1006 || gamepad1.getGamepadId() == 1009){
+                telemetry.addLine("Xbox Buttons");
+                telemetry.addLine("");
+                telemetry.addLine(" A / B           - Add / Remove Delay");
+                if (willPark){
+                    telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+                }
+                telemetry.addLine("  BACK         - Toggle Yellow Pixel Drop");
+            }else{
+                telemetry.addLine("Xbox Buttons");
+                telemetry.addLine("");
+                telemetry.addLine(" X / O           - Add / Remove Delay");
+                if (willPark){
+                    telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+                }
+                telemetry.addLine(" SHARE         - Toggle Yellow Pixel Drop");
             }
-            telemetry.addLine("  BACK         - Toggle Yellow Pixel Drop");
             //telemetry.addLine("Press A to add delay, Press B to remove delay");
             telemetry.addLine("");
             telemetry.addLine("Current Delay: " + delay);

@@ -312,6 +312,11 @@ public class FC extends LinearOpMode {
             loopTime = loop;
             telemetry.addData("Angular Velocity", imu.getRobotAngularVelocity(AngleUnit.DEGREES).zRotationRate + " degrees per second");
             telemetry.addData("Last PID Error", VARS.lastError);
+            telemetry.addData("Gamepad1 ID", gamepad1.getGamepadId());
+            telemetry.addData("Gamepad2 ID", gamepad2.getGamepadId());
+
+            // PS: 1008, 1005
+            // XBOX: 11, 1006, 1009
             telemetry.update();
 
             {
@@ -348,12 +353,12 @@ public class FC extends LinearOpMode {
             }
 
             if (gamepad2.left_bumper) {
-                claw.setPosition(0);
+                claw.setPosition(0.05);
 
             }
 
             if (gamepad2.right_bumper){
-                claw.setPosition(1);
+                claw.setPosition(0.6);
             }
 
             if (gamepad1.a){
@@ -502,16 +507,17 @@ public class FC extends LinearOpMode {
                     // switch to parallel to backdrop position
                     if (!Double.isNaN(cassette.getPosition())){
                         if (cassette.getPosition() - 0.04 > VARS.CST_UPPER_BOUND){
-                            if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
-                                if (cassette.getPosition() > 0.35){
-                                    cassette.setPosition(cassette.getPosition() - 0.04);
-                                }else{
-                                    cassette.setPosition(0.3);
-                                }
-
-                            }else{
-                                cassette.setPosition(cassette.getPosition() - 0.04);
-                            }
+//                            if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
+//                                if (cassette.getPosition() > 0.3){
+//                                    cassette.setPosition(cassette.getPosition() - 0.04);
+//                                }else{
+//                                    cassette.setPosition(0.25);
+//                                }
+//
+//                            }else{
+//                                cassette.setPosition(cassette.getPosition() - 0.04);
+//                            }
+                            cassette.setPosition(cassette.getPosition() - 0.04);
 
                             sleep(30);
                         }else{
@@ -601,10 +607,10 @@ public class FC extends LinearOpMode {
                 if (!Double.isNaN(cassette.getPosition())){
                     if (cassette.getPosition() - 0.05 > VARS.CST_UPPER_BOUND){
                         if (Math.abs(armMotor.getCurrentPosition() - VARS.ARM_START_POS) < 300){
-                            if (cassette.getPosition() > 0.35){
+                            if (cassette.getPosition() > 0.30){
                                 cassette.setPosition(cassette.getPosition() - 0.05);
                             }else{
-                                cassette.setPosition(0.3);
+                                cassette.setPosition(0.25);
                             }
 
                         }else{

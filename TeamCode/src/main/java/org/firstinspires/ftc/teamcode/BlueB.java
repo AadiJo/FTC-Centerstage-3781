@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.ftc.Encoder;
+import com.google.blocks.ftcrobotcontroller.runtime.obsolete.VuforiaCurrentGameAccess;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,6 +19,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
@@ -388,11 +390,8 @@ public class BlueB extends LinearOpMode {
         drive = new MecanumDrive(hardwareMap, new Pose2d(startXPos, startYPos, Math.toRadians(-90)));
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("CameraMonitorViewID", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        // TODO switch to red
         pipeline = new DetectionPipeline(2, 2);
         webcam.setPipeline(pipeline);
-        viewWebcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        FtcDashboard.getInstance().startCameraStream(webcam, 60);
         dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
@@ -405,6 +404,7 @@ public class BlueB extends LinearOpMode {
             }
 
         });
+        FtcDashboard.getInstance().startCameraStream(webcam, 60);
     }
 
     private void setManualExposure(int exposureMS, int gain) {
@@ -726,9 +726,10 @@ public class BlueB extends LinearOpMode {
             if (willDropYellow || propDirectionID == PropDirection.RIGHT){
                 Actions.runBlocking(
                         drive.actionBuilder(drive.pose)
-                                .setTangent(Math.toRadians(90))
-                                .splineToConstantHeading(new Vector2d(49.28, 5.92), Math.toRadians(0))
-                                .splineToSplineHeading(new Pose2d(63.20, 6.07, Math.toRadians(-90.00)), Math.toRadians(-90.00))
+//                                .setTangent(Math.toRadians(90))
+//                                .splineToConstantHeading(new Vector2d(49.28, 5.92), Math.toRadians(0))
+//                                .splineToSplineHeading(new Pose2d(63.20, 6.07, Math.toRadians(-90.00)), Math.toRadians(-90.00))
+                                .strafeToLinearHeading(new Vector2d(drive.pose.position.x, 4), Math.toRadians(-90))
                                 .build()
                 );
             }else{
@@ -768,13 +769,24 @@ public class BlueB extends LinearOpMode {
         ARM_START_POS = armMotor.getCurrentPosition();
         cassette.setPosition(1);
         while (opModeInInit()){
-            telemetry.addLine("Xbox Buttons");
-            telemetry.addLine("");
-            telemetry.addLine(" A / B           - Add / Remove Delay");
-            if (willPark){
-                telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+            if (gamepad1.getGamepadId() == 11 || gamepad1.getGamepadId() == 1006 || gamepad1.getGamepadId() == 1009){
+                telemetry.addLine("Xbox Buttons");
+                telemetry.addLine("");
+                telemetry.addLine(" A / B           - Add / Remove Delay");
+                if (willPark){
+                    telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+                }
+                telemetry.addLine("  BACK         - Toggle Yellow Pixel Drop");
+            }else{
+                telemetry.addLine("Xbox Buttons");
+                telemetry.addLine("");
+                telemetry.addLine(" X / O           - Add / Remove Delay");
+                if (willPark){
+                    telemetry.addLine(" ↑ / ↓         - Away / Close Parking");
+                }
+                telemetry.addLine(" SHARE         - Toggle Yellow Pixel Drop");
             }
-            telemetry.addLine("  BACK         - Toggle Yellow Pixel Drop");
+
             //telemetry.addLine("Press A to add delay, Press B to remove delay");
             telemetry.addLine("");
             telemetry.addLine("Current Delay: " + delay);
