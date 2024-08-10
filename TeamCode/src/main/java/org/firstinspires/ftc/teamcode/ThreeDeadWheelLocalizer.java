@@ -16,10 +16,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
 public final class ThreeDeadWheelLocalizer implements Localizer {
+
     public static class Params {
-        public double par0YTicks = 0.0; //3000;//1.0; // y position of the first parallel encoder (in tick units)
-        public double par1YTicks = 1.0; //3000;//1.0; // y position of the second parallel encoder (in tick units)
-        public double perpXTicks = 0.0; //26666.67;//1.0; // x position of the perpendicular encoder (in tick units)
+        public double par0YTicks = -1924.7817058912942; // y position of the first parallel encoder (in tick units)
+        public double par1YTicks = 1619.087251882069; // y position of the second parallel encoder (in tick units)
+        public double perpXTicks = -1076.3166316095883; // x position of the perpendicular encoder (in tick units)
     }
 
     public static Params PARAMS = new Params();
@@ -31,11 +32,17 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
     private int lastPar0Pos, lastPar1Pos, lastPerpPos;
 
     public ThreeDeadWheelLocalizer(HardwareMap hardwareMap, double inPerTick) {
-        par0 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftEncoder")));
-        par1 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "rightEncoder")));
-        perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frontEncoder")));
+        // TODO: make sure your config has **motors** with these names (or change them)
+        //   the encoders should be plugged into the slot matching the named motor
+        //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
+        par0 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "frntRT"))); // leftEncoder
+        par1 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "bckLF"))); // frntLF (rightEncoder)
+        perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "bckRT"))); // frntRT (frontEncoder)
 
+        // TODO: reverse encoder directions if needed
+        par0.setDirection(DcMotorSimple.Direction.FORWARD);
         par1.setDirection(DcMotorSimple.Direction.REVERSE);
+        perp.setDirection(DcMotorSimple.Direction.REVERSE);
 
         lastPar0Pos = par0.getPositionAndVelocity().position;
         lastPar1Pos = par1.getPositionAndVelocity().position;
